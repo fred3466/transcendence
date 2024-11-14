@@ -1,0 +1,63 @@
+<!-- templates/game/game.html -->
+
+{% extends 'home.html' %}
+{% load partials %}
+{% load static %}
+
+{% partialdef my_htmx_content inline %}
+
+
+{% block title %}
+    Game
+{% endblock %}
+
+{% block styles %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+{% endblock %}
+
+{% block script %}
+<script>
+    const user = '{{ user.username|escapejs }}';
+    const party_id = '{{ party_id|escapejs }}';
+    const num_players = '{{ num_players|escapejs }}';
+    const match_id = "{{ match_id|default_if_none:'' }}";
+    const tournament_id = "{{ tournament_id|default_if_none:'' }}";
+</script>
+
+<script>
+if (num_players === "0") {
+	// alert("PLAYING WITH AI");
+	const script = document.createElement('script');
+	script.src = "{% static 'pongLocal.js' %}";
+	script.defer = true;
+	document.head.appendChild(script);
+} else if (num_players === "1") {
+	// alert("PLAYING WITH AI");
+	const script = document.createElement('script');
+	script.src = "{% static 'pongIA.js' %}";
+	script.defer = true;
+	document.head.appendChild(script);
+} else {
+	// alert("PLAYING WITH OTHER HUMAN");
+	const script = document.createElement('script');
+	script.src = "{% static 'pong.js' %}";
+	script.defer = true;
+	document.head.appendChild(script);
+}
+</script>
+{% endblock %}
+
+{% block body %}
+<div id="waiting-room">
+    <p>Waiting for another player to join...</p>
+</div>
+
+<div id="game-container">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="gameover-message" style="display: none;">
+            <p id="gameover-text"></p>
+            <p id="redirect-text"></p>
+        </div>
+</div>
+{% endblock %}
+{% endpartialdef %}

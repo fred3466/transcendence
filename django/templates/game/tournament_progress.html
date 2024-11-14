@@ -1,0 +1,47 @@
+{% extends 'home.html' %}
+{% load static %}
+
+{% block title %}
+	{{ tournament.name }} Progress
+{% endblock %}
+
+{% block body %}
+<h2 class="text-center">Tournament : {{ tournament.name }}</h2>
+<p>Status: {{ tournament.status }}</p>
+
+{% if tournament.status == 'completed' %}
+    <h3 class="mt-3 mb-3">The tournament has concluded.</h3>
+    {% with winner_match=matches.last %}
+        {% if winner_match.winner %}
+            <p class="text-center">Winner: {{ winner_match.winner.username }}</p>
+        {% else %}
+            <p>No winner could be determined.</p>
+        {% endif %}
+    {% endwith %}
+{% else %}
+    {% for match in matches %}
+        <div>
+            <strong>Round {{ match.round_number }}:</strong>
+            {% if match.player1 %}
+                {{ match.player1.username }}
+            {% else %}
+                <em>Bye</em>
+            {% endif %}
+            vs
+            {% if match.player2 %}
+                {{ match.player2.username }}
+            {% else %}
+                <em>Bye</em>
+            {% endif %}
+            - Status: {{ match.status }}
+            {% if match.status == 'completed' %}
+            - Winner: {{ match.winner.username }}
+            {% elif match.status == 'pending' and match.is_participant %}
+                - <a href="{% url 'game:play_match' tournament.id match.id %}">Play Now</a>
+            {% else %}
+                - <em>Waiting for players</em>
+            {% endif %}
+        </div>
+    {% endfor %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres
+    container_name: db
+    env_file: .env
+    volumes:
+        - .data/db:/var/lib/postgresql/data
+    restart: unless-stopped
+  
+  django:
+    container_name: django
+    build:
+      context: ./django
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+      - vault
+    env_file: .env
+    volumes:
+      - ./django:/django
+    
+  nginx:
+    container_name: nginx
+    image: owasp/modsecurity-crs:nginx-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - django
+    volumes:
+      - ./nginx/certs/selfsigned.crt:/etc/nginx/conf/server.crt
+      - ./nginx/certs/selfsigned.key:/etc/nginx/conf/server.key
+      - ./nginx/conf/nginx.conf:/etc/nginx/templates/nginx.conf.template
+      - ./nginx/conf/default.conf:/etc/nginx/templates/conf.d/default.conf.template
+    restart: unless-stopped
+
+  vault:
+    container_name: vault
+    build: 
+      context: ./vault  # Use the Dockerfile from the ./vault directory
+    env_file: .env
+    cap_add:
+      - IPC_LOCK
+    entrypoint: /vault/entrypoint.sh  # This will use the script inside the container
+    volumes:
+      - ./vault/logs:/vault/logs  # Mount logs directory
+    ports:
+      - "8200:8200"  # Expose the Vault port

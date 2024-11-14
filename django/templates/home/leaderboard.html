@@ -1,0 +1,40 @@
+{% extends 'home.html' %}
+{% load static %}
+
+{% block title %}
+    Leaderboard
+{% endblock %}
+
+{% block body %}
+	<main class="table">
+		<section class="table_header">
+			<h1>Leaderboard</h1>
+		</section>
+		<section class="table_body">
+			<table>
+				<thead>
+					<tr>
+						<th>Rank</th>
+						<th>Player</th>
+						<th>Wins</th>
+						<th>Losses</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for user in all_users %}
+						<tr>
+							<td>{{ forloop.counter }}</td>
+							<td>
+								<img src="{{ user.profile.image.url }}" alt="user photo">
+								<p>{{ user.username }}</p>
+							</td>
+							<td>{{ user.profile.wins }}</td>
+							<td>{{ user.profile.losses }}</td>
+						</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</section>
+	</main>
+
+{% endblock %}

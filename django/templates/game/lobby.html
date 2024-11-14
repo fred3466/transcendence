@@ -1,0 +1,95 @@
+{% extends 'home.html' %}
+{% load partials %}
+{% load static %}
+{% partialdef my_htmx_content inline %}
+
+{% block title %}
+    Lobby
+{% endblock %}
+
+{% block body %}
+<div class="lobby-menu">
+    <h3>Lobby menu</h3>
+</div>
+<div>
+    <form method="post" action="{% url 'game:lobby' %}">
+		{% csrf_token %}
+		<!-- {{ form.as_table }} -->
+		
+		<label for="num_players">Select the number of players:</label>
+		<select id="num_players" name="num_players">
+			<option value="2">2 Players</option>
+			<option value="0">Play Local</option>
+			<option value="1">Play with AI</option>
+			<option value="3">3 Players</option>
+		</select>
+		
+		<button id="create-party-button" type="button">Create Party</button>
+	</form>
+	{% block script %}
+	<script>
+		document.getElementById('create-party-button').addEventListener('click', function(event) {
+			event.preventDefault();
+	
+			// Get the selected number of players from the dropdown
+			const num_players = document.getElementById('num_players').value;
+	
+			// Conditional logic to load the correct game script
+			if (num_players === "0") {
+				// alert("PLAYING WITH AI");
+				const script = document.createElement('script');
+				script.src = "{% static 'pongLocal.js' %}";
+				script.defer = true;
+				document.head.appendChild(script);
+			} else if (num_players === "1") {
+				const script = document.createElement('script');
+				script.src = "{% static 'pongIA.js' %}";
+				script.defer = true;
+				document.head.appendChild(script);
+			} else {
+				// alert("PLAYING WITH OTHER HUMAN");
+				const script = document.createElement('script');
+				script.src = "{% static 'pong.js' %}";
+				script.defer = true;
+				document.head.appendChild(script);
+			}
+	
+			// Optionally, submit the form programmatically if needed
+			event.target.form.submit();
+		});
+	</script>
+	{% endblock %}
+</div>
+<div class="mt-5">
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Current Players</th>
+                <th scope="col">Number of Players</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for party in parties %}
+                {% if party.status == 'active' %}
+                    <tr>
+                        <th scope="row">{{ party.id }}</th>
+                        <td>{{ party.nbPlayer }}</td>
+                        <td>{{ party.num_players }}</td>
+                        <td><a hx-get="{% url 'game:game' party.id %}" href="{% url 'game:game' party.id %}">JOIN</a></td>
+                    </tr>
+                {% elif party.status == 'in_progress' %}
+                    <tr>
+                        <th scope="row">{{ party.id }}</th>
+                        <td>{{ party.nbPlayer }}</td>
+                        <td>{{ party.num_players }}</td>
+                        <td></td>
+                    </tr>    
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock body%}
+{% endpartialdef %}

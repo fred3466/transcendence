@@ -1,0 +1,303 @@
+{% extends 'home.html' %}
+{% load static %}
+
+{% block title %}
+	{{ username | capfirst}} (Profile)
+{% endblock %}
+
+{% block styles %}
+	<link rel="stylesheet" href="{% static 'css/users.css' %}">
+{% endblock %}
+
+{% block body %}
+	<div class="header d-flex">
+		<img class="header_img" src="{{ profile_img }}" width="125px" height="125px" alt="profile picture">
+		<div class="header_info">
+			<div class="d-flex align-items-center">
+				<h1 class="">@{{ username }}</h1>
+				{% if username == request.user.username %}
+					<a class="header_option edit" hx-get="{% url 'users:profile_edit' %}" hx-target="#app-root" hx-swap="innerHtml">
+						<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+							<path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
+							</svg>
+					</a>
+				{% endif %}
+				
+				{% if active == True %}
+					<div class="status_online"></div>
+				{% else %}
+					<div class="status_offline"></div>
+				{% endif %}
+
+				<div
+					data-id="{{ id }}"
+					{%if csrf_token %} data-csrf="{{ csrf_token }}" {%else%} data-csrf="{{ my_csrf }}" {%endif%}
+					id="header_status_bar"
+				>
+
+				{% if request.user.is_authenticated %}
+					{% if is_self == False %}
+						<!-- Cancel Friend Request / Send Friend Request / Remove Friend -->
+						{% if is_friend == False %}
+							<!-- He/she sent you a request -->
+							{% if request_sent == 0 %}
+								<!-- ACCEPT -->
+								<button
+									onclick="acceptFriendRequest(
+										'{{pending_friend_request_id}}',
+										'header_status_bar'
+										)"
+									id="id_accept_request"
+									class="btn_requests">
+									Accept
+								</button>
+								<!-- IGNORE -->
+								<button
+									onclick='declineFriendRequest(
+										"{{pending_friend_request_id}}",
+										"header_status_bar",
+									)'
+									id="id_ignore_request"
+									class="btn_requests">
+									Ignore
+								</button>
+							{% endif %}
+							<!-- You sent him/her a request -->
+							{% if request_sent == 1 %}
+								<!-- CANCEL -->
+								<button
+									data-next-url="{% url 'users:friend_request' %}"
+									onclick="cancelFriendRequest(
+										'{{ id }}',
+										{% if csrf_token %} '{% csrf_token %}' {% else %} '{{my_csrf}}' {%endif%}
+									)" 
+									id="id_cancel_request_btn"
+									class="btn_requests">
+									Invitation sent
+								</button>
+							{% endif %}
+							<!-- No requests has been sent -->
+							{% if request_sent == -1 %}
+								{% if request.user in displayed_user.profile.blocklist.all %}
+									<!-- nothing to do -->
+								{% else %}
+									{% if displayed_user in request.user.profile.blocklist.all %}
+										<!-- UNBLOCK -->
+										<button
+											onclick='blockUnblock("{{ id }}", "unblock")' 
+											class="btn_requests">
+											Unblock
+										</button>
+									{% else %}
+										<!-- ADD FRIEND -->
+										<button
+											data-next-url="{% url 'users:friend_request_cancel' %}"
+											onclick="sendFriendRequest(
+												'{{ id }}', 
+												{% if csrf_token %} '{% csrf_token %}' {% else %} '{{my_csrf}}' {%endif%},
+											)"
+											class="btn_requests"
+											id="id_send_friend_request_btn">
+											Add Friend
+										</button>
+										<!-- BLOCK -->
+										<button
+											onclick='blockUnblock("{{ id }}", "block")' 
+											class="btn_requests">
+											Block
+										</button>
+									{% endif %}
+								{% endif %}
+							{% endif %}
+						{% endif %}
+						{% if is_friend == True %}
+								<!-- UNFRIEND -->
+								<button
+									onclick="removeFriend(
+										'{{ id }}',
+										{% if csrf_token %} '{% csrf_token %}' {% else %} '{{my_csrf}}' {%endif%},
+									)"
+									id="id_unfriend_btn" 
+									class="btn_requests">
+									Unfriend
+								</button>
+																<!-- MESSAGE -->
+								<a href="/chat/">
+									<button class="btn_requests">
+											Message
+									</button>
+								</a>
+								<!-- BLOCK -->
+								<button 
+									onclick='blockUnblock("{{ id }}", "block")' 
+									class="btn_requests" 
+									id="id_block_btn">
+									Block
+								</button>
+						{% endif %} <!-- if a friend -->
+					{% endif %} <!-- Not self -->
+
+				{% endif %}
+			
+			</div> <!-- #action_bar -->
+
+			</div>
+			<p>{{description}}</p>
+			<div class="d-flex header_score">
+				<p class="mr-5 bs_v">wins: {{ wins }}</p>
+				<p class="bs_l">losses: {{ losses }}</p>
+			</div>
+		</div>
+	</div>
+	<div class="d-flex">
+		<section class="feed">
+			<h3>Latest Matches</h3>
+			{% if latest_matches %}
+				<ul class="match-list">
+					{% for match in latest_matches %}
+						<li class="match-item">
+							<div>
+								<strong>Opponent:</strong>
+								<a 
+									hx-get="/users/profile/{{ match.opponent.username }}"
+									hx-target="#app-root"
+									hx-push-url="true">
+									{{ match.opponent.username }}
+								</a>
+							</div>
+							<div>
+								<strong>Score:</strong> {{ match.player_score }} - {{ match.opponent_score }}
+							</div>
+							<div>
+								<strong>Date:</strong> {{ match.timestamp|date:"Y-m-d H:i" }}
+							</div>
+						</li>
+					{% endfor %}
+				</ul>
+			{% else %}
+				<p>No matches found.</p>
+			{% endif %}
+		</section>
+		
+		{% if request.user.is_authenticated and is_self == True %}
+		<aside class="sidebar ms-auto">
+
+			<!-- Friends List -->
+			<h5>Friends ({{ friends | length }})</h5>
+			<div class="users_list">
+				{% for f in friends %}
+				<div class="user_card">
+					<a 
+						hx-get="/users/profile/{{ f.username }}"
+						hx-target="#app-root"
+						hx-push-url="true">
+						<img
+							src="{{ f.profile.image.url }}"
+							width="48px"
+							height="48px"
+							alt="profile picture"
+						>
+					</a>
+					<p>{{ f.username }}</p>
+				</div>
+				{% endfor %}
+			</div>
+
+			<!-- Friend Requests -->
+			<h5>Friend Requests</h5>
+			<div 
+				data-id="{{id}}"
+				{%if csrf_token %} data-csrf="{{ csrf_token }}" {%else%} data-csrf="{{ my_csrf }}" {%endif%}
+				id="widget_status_bar"
+			>
+			{% if request.user.is_authenticated and is_self == True%}
+				{% for request in friend_requests %}
+				<div class="request_card">
+					<a 
+						hx-get="/users/profile/{{ request.sender.username}}"
+						hx-target="#app-root"
+						hx-push-url="true">
+						<img src="{{ request.sender.profile.image.url }}" width="48px" height="48px" alt="profile picture">
+					</a>
+					<div>
+						<p><b>{{ request.sender | capfirst }}</b></p>
+						<div>
+							<button
+								onclick="acceptFriendRequest(
+									'{{request.id}}',
+									'widget_status_bar',
+								)"
+								class="btn_requests">
+								Confirm
+							</button>
+							<button 
+								onclick='declineFriendRequest(
+									"{{request.id}}",
+									"widget_status_bar",
+								)' 
+								class="btn_discrete btn_passive">
+								Ignore
+							</button>
+						</div>
+					</div>
+				</div>
+				{% endfor %}
+			{% endif %}
+			</div>
+
+			<!-- All Users -->
+			<h5>All Users</h5>
+			<div class="users_list">
+
+				{% for usr in all_users %}
+					{% if usr != request.user and usr not in friends and usr not in blocklist %}
+						<div class="user_card">
+							<a 
+								hx-get="/users/profile/{{ usr.username }}"
+								hx-target="#app-root"
+								hx-push-url="true">
+								<img src="{{ usr.profile.image.url }}" width="48px" height="48px" alt="profile picture">
+							</a>
+							<p>{{ usr.username }}</p>
+						</div>
+					{% endif %}
+				{% endfor %}
+	
+			</div>
+
+			<!-- Blocked -->
+			<h5>Blocked</h5>
+			<div class="users_list">
+			{% if request.user.is_authenticated and is_self == True %}
+
+				{% if blocklist|length > 0 %}
+
+					{% for blocked_user in blocklist %}
+					<div class="user_card">
+						<a 
+							hx-get="/users/profile/{{ blocked_user.username }}"
+							hx-target="#app-root"
+							hx-push-url="true">
+							<img src="{{ blocked_user.profile.image.url }}" width="48px" height="48px" alt="profile picture">
+						</a>
+						<p>{{ blocked_user.username }}</p>
+					</div>
+					{% endfor %}
+
+				{% endif %}
+			
+			{% endif %}
+			</div>
+
+		</aside>
+		{% endif%}
+	</div>
+
+{% endblock %}
+
+{% block script_body %}
+
+	<script type="text/javascript" src="{% static 'js/friendrequests.js' %}"></script>
+
+{% endblock %}
+

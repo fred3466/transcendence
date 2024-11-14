@@ -1,0 +1,11 @@
+/* To center the lobby menu and make it bigger */
+.lobby-menu {
+    display: flex;
+    flex-direction: row; /* Stack the elements vertically */
+    align-items: center; /* Center elements horizontally */
+    justify-content: center; /* Center elements vertically */
+    text-align: center; /* Ensure text is centered */
+    margin: auto;
+    width: 50%; /* Control the width of the lobby menu */
+    padding: 20px;
+}

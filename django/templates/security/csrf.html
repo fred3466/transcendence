@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+    <body>
+        <h1>Test : CSRF</h1>
+        <form action="/csrf/" method="POST">
+            <p>Your current password is : <strong>{{ current_password | safe }}</strong></p>
+            <label for="new_password">New password :</label>
+            <input type="text" id="new_password" name="new_password">
+            <button type="submit">Change password</button>
+        </form>
+    </body>
+</html>

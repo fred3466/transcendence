@@ -1,0 +1,36 @@
+#waiting-room {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#game-container {
+    position: relative;
+    margin-top: 20px;
+    padding-top: 20px;
+    display: block;
+    justify-content: center;
+}
+
+
+#gameCanvas {
+    position: relative;
+    z-index: 1;
+}
+
+#gameover-message {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent overlay */
+    color: white;
+    display: none; /* Hidden by default; use 'flex' when visible */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10; /* Ensure it appears above other elements */
+}
+
+#gameover-message p {
+    font-size: 48px;
+    margin: 20px;
+}

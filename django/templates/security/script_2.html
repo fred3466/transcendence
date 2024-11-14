@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+    <body>
+        <h1>Test : DOM-Based XSS script</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <textarea name="content" rows="5"></textarea>
+            <button type="submit">Submit your script</button>
+        </form>
+
+        <p>Results :</p>
+        <div id="comment-section"></div>
+        <script>
+            var comments = "{{ comments | safe }}";
+
+            comments.forEach(function(comment) {
+                var div = document.createElement('div');
+                div.innerHTML = comment.fields.content;
+                document.getElementById("comment-section").appendChild(div);
+            });
+        </script>
+    </body>
+</html>

@@ -1,0 +1,29 @@
+{% extends 'home.html' %}
+{% load static %}
+
+{% block title %}
+	{{ tournament.name }}
+{% endblock %}
+
+{% block body %}
+<h2 class="mb-4">{{ tournament.name }}</h2>
+<div>
+<p>Players: {{ tournament.players.count }}</p>
+<ul>
+    {% for players in tournament.players.all %}
+    <li>{{ players.username }}</li>
+    {% endfor %}
+</ul>
+</div>
+
+{% if can_start %}
+<form method="post" action="{% url 'game:start_tournament' tournament.id %}">
+    {% csrf_token %}
+    <button type="submit">Start Tournament</button>
+</form>
+{% endif %}
+{% if tournament.status == 'in_progress' %}
+	<a href="{% url 'game:tournament_progress' tournament.id %}" class="btn btn-info mt-3">View Tournament Progress</a>
+{% endif %}
+
+{% endblock %}

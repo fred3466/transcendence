@@ -1,0 +1,39 @@
+{% extends 'home.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}
+	FT_TRANSCENDENCE
+{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="{% static 'users/styles.css' %}">
+{% endblock %}
+
+{% block body %}
+	<div class="signin_box">
+		<div>
+			<h1>Get Started</h1>
+			<p>Already have an account? <a href="{% url 'users:login' %}">Login</a></p>
+			<hr>
+			<div>
+				<form hx-post="{% url 'users:signup' %}" hx-target="#app-body" hx-push-url="true">
+					<div class="signin_form_inputs">
+						{% csrf_token %}
+						{{ form | crispy }}	
+					</div>
+					<div class="form_cta">
+						<button type="submit">Register</button>
+						<a class="row_custom" href="{{ authorize_uri }}">
+                            <span>or use</span>
+                            <img class="icon" src="{% static 'images/42-logo.svg' %}" alt="42 school logo">
+                        </a>
+					</div>
+				</form>
+				{% if form.errors %}
+					<p>Please try again.</p>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+{% endblock %}

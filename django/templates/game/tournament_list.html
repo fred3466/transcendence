@@ -1,0 +1,71 @@
+{% extends 'home.html' %}
+<!-- fred -->
+{% load partials %}
+<!-- fred -->
+{% load static %}
+
+{% block title %}
+    Tournaments
+{% endblock %}
+
+{% block body %}
+<!-- fred -->
+{% partialdef my_htmx_content inline %}
+<!-- fred -->
+<div class="tournament-list" >    
+    <!-- Create Tournament Form -->
+    <div class="create-tournament-form mb-4">
+        <h3 class="text-center mb-3">Create a New Tournament</h3>
+        <form method="post" action="{% url 'game:tournament_list' %}">
+            {% csrf_token %}
+            {{ create_tournament_form.as_p }}
+            <div class="d-flex justify-content-center">
+                <button type="submit" class="btn btn-primary">Create Tournament</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- List of Tournaments -->
+    <h3 class="mt-5 text-center">Available Tournaments</h3>
+    <table>
+        <thead>
+            <tr>
+                <th class="bg-primary">ID</th>
+                <th class="bg-primary">Name</th>
+                <th class="bg-primary">Players Joined</th>
+                <th class="bg-primary">Status</th>
+                <th class="bg-primary">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tournament in tournaments %}
+                <tr>
+                    <td>{{ tournament.id }}</td>
+                    <td>{{ tournament.name }}</td>
+                    <td>{{ tournament.players.count }}</td>
+                    <td>{{ tournament.get_status_display }}</td>
+                    <td>
+                        {% if request.user in tournament.players.all and tournament.status != 'completed' %}
+                            <span class="badge bg-success me-2">Joined</span>
+                        {% elif tournament.status != 'waiting' %}
+                            <a></a>
+                        {% else %}
+                            <a href="{% url 'game:join_tournament' tournament.id %}" class="btn btn-sm btn-secondary me-2">Join</a>
+                        {% endif %}
+                        {% if tournament.status == 'completed' %}
+                            <a href="{% url 'game:tournament_progress' tournament.id %}" class="btn btn-sm btn-info">View</a>
+                        {% else %}
+                            <a href="{% url 'game:tournament_detail' tournament.id %}" class="btn btn-sm btn-info">Details</a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5">No active tournaments available.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+  {% endpartialdef %}
+{% endblock %}

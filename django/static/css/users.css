@@ -1,0 +1,31 @@
+.match-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.match-item {
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+}
+
+.match-item:last-child {
+    border-bottom: none;
+}
+
+.match-item div {
+    margin-bottom: 5px;
+}
+
+.match-item a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.match-item a:hover {
+    text-decoration: underline;
+}
+
+.sidebar {
+    width: 200px;
+    margin-right: 20px;
+}
