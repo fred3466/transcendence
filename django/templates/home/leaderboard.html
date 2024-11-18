@@ -1,7 +1,9 @@
 {% extends 'home.html' %}
+{% load partials %}
 {% load static %}
 
-{% block script_body %}<script>document.title = 'Leaderboard'</script>{% endblock %}
+{% block script_body %}
+{% endblock %}
 
 {% block body %}
 	<main class="table">
@@ -35,4 +37,5 @@
 		</section>
 	</main>
 
+	<script type="text/javascript">document.title = 'Leaderboard';</script>
 {% endblock %}

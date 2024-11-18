@@ -75,7 +75,7 @@
 {% endblock %}
 {% block script_body %}
     <script>
-    document.title = 'Chat'
+        document.title = 'Chat';
         function generateRoom(userId) {
             var formId = "create-room-form-" + userId;
             var name = "Room " + Math.floor(Math.random() * 1000);

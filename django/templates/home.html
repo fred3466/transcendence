@@ -3,6 +3,7 @@
 {% load static %}
 {% load crispy_forms_tags %}
 
+
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
@@ -15,12 +16,11 @@
 		{% block styles %}{% endblock %}
 		
         <script src="/static/js/htmx.js" crossorigin="anonymous"></script>
-		<script src="https://unpkg.com/htmx-ext-head-support@2.0.1/head-support.js"></script>
 		<title>{% block title %}{% endblock %}</title>
 		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 		{% block script %}{% endblock %}
 	</head>
-	<body   hx-ext="head-support" hx-ext="debug, event-header" hx-headers='{"X-CSRFToken": "{% csrf_token %}"}' id="app-body">
+	<body hx-ext="debug, event-header" hx-headers='{"X-CSRFToken": "{% csrf_token %}"}' id="app-body">
         {% include './navbar.html' %}
 		<main id="app-root" class="container_global">
 			{% if show_alerts %}

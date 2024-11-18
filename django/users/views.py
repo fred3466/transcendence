@@ -54,6 +54,7 @@ FROMLOGIN = 'd56b699830e77ba53855679cb1d252da'
 FROMSIGNUP = '7d2abf2d0fa7c3a0c13236910f30bc43'
 
 def build_authorize_uri(state_value):
+    logger.debug("== build_authorize_uri")
     params = {
         'client_id': CLIENT_ID,
         'redirect_uri': REDIRECT_URI,
@@ -66,6 +67,7 @@ def build_authorize_uri(state_value):
 # Update your views to use the new build_authorize_uri function
 @require_http_methods(['GET', 'POST'])
 def signup_v(request: HtmxHttpRequest) -> HttpResponse:
+    logger.debug("== signup_v")
     context = {
         'authorize_uri': build_authorize_uri(FROMSIGNUP),
         'show_alerts': True,
@@ -86,6 +88,7 @@ def signup_v(request: HtmxHttpRequest) -> HttpResponse:
 
 @require_http_methods(['GET', 'POST'])
 def login_v(request: HtmxHttpRequest) -> HttpResponse:
+    logger.debug("== login_v")
     context = {
         'authorize_uri': build_authorize_uri(FROMLOGIN),
         'show_alerts': True,
@@ -113,6 +116,7 @@ token to get user informations
 """
 @require_GET
 def callback(request: HtmxHttpRequest) -> None:
+    logger.debug("== callback")
     page_origin = request.GET.get('state')
     authorization_code = request.GET.get('code')
     if authorization_code is None:
@@ -163,6 +167,7 @@ def callback(request: HtmxHttpRequest) -> None:
 
 @require_POST
 def logout_v(request: HtmxHttpRequest) -> None:
+    logger.debug("== logout_v")
     if request.method == 'POST':
         user = request.user
         user.profile.active = False
@@ -178,6 +183,7 @@ Profile view of current user or another one
 """
 @login_required(login_url='/users/login/?redirected=true')
 def profile(request: HtmxHttpRequest, username: str) -> HttpResponse:
+    logger.debug("== profile")
     context = {}
     try:
         displayed_user = User.objects.get(username=username)
@@ -270,6 +276,7 @@ Logic for deleting a user > profile > friendlist
 """
 @login_required(login_url='/users/login/?redirected=true')
 def deleteprofile(request: HtmxHttpRequest, username: str) -> None:
+    logger.debug("== deleteprofile")
     # Ensure the user is deleting their own profile or is a superuser
     if request.user.username != username and not request.user.is_superuser:
         return push_url(render(request, '404.html'),'')
@@ -289,6 +296,7 @@ Settings page for editing user info
 """
 @login_required(login_url='/users/login/?redirected=true')
 def editprofile(request: HtmxHttpRequest) -> HttpResponse:
+    logger.debug("== editprofile")
     context = {
         'request': request,
     }
@@ -319,6 +327,7 @@ def editprofile(request: HtmxHttpRequest) -> HttpResponse:
 Friend Request System
 """
 def send_friend_request(request: HtmxHttpRequest) -> HttpResponse:
+    logger.debug("== send_friend_request")
     user = request.user
     payload = {}
     if request.method == 'POST' and user.is_authenticated:
@@ -357,6 +366,7 @@ def send_friend_request(request: HtmxHttpRequest) -> HttpResponse:
     return push_url(HttpResponse(json.dumps(payload), content_type="application/json"),'')
 
 def accept_friend_request(request: HtmxHttpRequest, *args, **kwargs) -> HttpResponse:
+    logger.debug("== accept_friend_request")
     user = request.user
     payload = {}
     if request.method == "GET" and user.is_authenticated:
@@ -380,6 +390,7 @@ def accept_friend_request(request: HtmxHttpRequest, *args, **kwargs) -> HttpResp
     return push_url(HttpResponse(json.dumps(payload), content_type="application/json"),'')
 
 def decline_friend_request(request: HtmxHttpRequest, *args, **kwargs) -> HttpResponse:
+    logger.debug("== decline_friend_request")
     user = request.user
     payload = {}
     if request.method == "GET" and user.is_authenticated:
@@ -403,6 +414,7 @@ def decline_friend_request(request: HtmxHttpRequest, *args, **kwargs) -> HttpRes
     return push_url(HttpResponse(json.dumps(payload), content_type="application/json"),'')
 
 def cancel_friend_request(request: HtmxHttpRequest) -> HttpResponse:
+    logger.debug("== cancel_friend_request")
     user = request.user
     payload = {}
     if request.method == "POST" and user.is_authenticated:
@@ -431,6 +443,7 @@ def cancel_friend_request(request: HtmxHttpRequest) -> HttpResponse:
     return push_url(HttpResponse(json.dumps(payload), content_type="application/json"),'')
 
 def remove_friend(request: HtmxHttpRequest) -> HttpResponse:
+    logger.debug("== remove_friend")
     user = request.user
     payload = {}
     if request.method == "POST" and user.is_authenticated:
@@ -450,6 +463,7 @@ def remove_friend(request: HtmxHttpRequest) -> HttpResponse:
     return push_url(HttpResponse(json.dumps(payload), content_type="application/json"),'')
 
 def blocking(request: HtmxHttpRequest) -> HttpResponse:
+    logger.debug("== blocking")
     current_user = request.user
     blocklist = current_user.profile.blocklist
     action = request.GET.get("action") or request.POST.get("action")

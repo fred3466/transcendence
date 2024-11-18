@@ -32,19 +32,29 @@ logger = logging.getLogger("home")
 
 @login_required(login_url='/users/login/?redirected=true')
 def welcome(request: HtmxHttpRequest):
-	context = {
-		"show_alert": True,
-	}
-	if 'HTTP_HX_REQUEST' in request.META:
-		html = render_block_to_string('home/welcome.html', 'body', context)
-		return push_url(HttpResponse(html),'')
-	return push_url(render(request, 'home/welcome.html', context),'')
+    logger.debug("== welcome")
+    context = {
+        "show_alert": True,
+    }
+    template_name = "home/welcome.html"
+    if request.htmx:
+        template_name += "#my_htmx_content"
+    if 'HTTP_HX_REQUEST' in request.META:
+        html = render_block_to_string('home/welcome.html', 'body', context)
+        return push_url(HttpResponse(html),'')
+    
+
+    return push_url(render(request, template_name, context),'')
 
 def leaderboard(request: HtmxHttpRequest):
-	context = {
-		'all_users': User.objects.all().order_by('-profile__wins'),
-	}
-	if 'HTTP_HX_REQUEST' in request.META:
-		html = render_block_to_string('home/leaderboard.html', 'body', context)
-		return push_url(HttpResponse(html),'')
-	return push_url(render(request, 'home/leaderboard.html', context),'')
+    logger.debug("== leaderboard")
+    context = {
+        'all_users': User.objects.all().order_by('-profile__wins'),
+    }
+    template_name = "home/leaderboard.html"
+    if request.htmx:
+        template_name += "#my_htmx_content"
+    if 'HTTP_HX_REQUEST' in request.META:
+        html = render_block_to_string('home/leaderboard.html', 'body', context)
+        return push_url(HttpResponse(html),'')
+    return push_url(render(request, template_name, context),'')
