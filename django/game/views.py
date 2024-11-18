@@ -19,7 +19,7 @@ from django.views.decorators.http import require_POST
 from faker import Faker
 from django_htmx.middleware import HtmxDetails
 from django.core.paginator import Paginator
-from django_htmx.http import HttpResponseClientRedirect
+from django_htmx.http import HttpResponseClientRedirect,push_url
 
 # Typing pattern recommended by django-stubs:
 # https://github.com/typeddjango/django-stubs#how-can-i-create-a-httprequest-thats-guaranteed-to-have-an-authenticated-user
@@ -68,18 +68,6 @@ def join_tournament(request, tournament_id):
         return HttpResponseForbidden("Cannot join a tournament that is not active.")
     tournament.players.add(request.user)
     return redirect('game:tournament_detail', tournament_id=tournament.id)
-
-@login_required(login_url='/users/login/')
-def tournament_detail(request, tournament_id):
-    logger.debug("== tournament_detail")
-    tournament = get_object_or_404(Tournament, id=tournament_id)
-    is_creator = tournament.creator == request.user
-    can_start = is_creator and tournament.players.count() >= 2 and tournament.status == 'waiting'
-    return render(request, 'game/tournament_detail.html', {
-        'tournament': tournament,
-        'is_creator': is_creator,
-        'can_start': can_start,
-    })
 
 @require_POST
 @login_required(login_url='/users/login/')
@@ -160,6 +148,21 @@ def create_matchups(tournament):
 ###     TOURNAMENT
 ################################################################################
 @login_required(login_url='/users/login/')
+def tournament_detail(request: HtmxHttpRequest, tournament_id):
+    logger.debug("== tournament_detail")
+    template_name = "game/tournament_detail.html"
+    if request.htmx:
+    	template_name += "#my_htmx_content"
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    is_creator = tournament.creator == request.user
+    can_start = is_creator and tournament.players.count() >= 2 and tournament.status == 'waiting'
+    return push_url(render(request, template_name, {
+        'tournament': tournament,
+        'is_creator': is_creator,
+        'can_start': can_start,
+    }),'')
+
+@login_required(login_url='/users/login/')
 def tournament_list(request: HtmxHttpRequest) -> HttpResponse:
     logger.debug("== tournament_list")
     template_name = "game/tournament_list.html"
@@ -173,16 +176,18 @@ def tournament_list(request: HtmxHttpRequest) -> HttpResponse:
             tournament.creator = request.user
             tournament.save()
             tournament.players.add(request.user)
-            return redirect('game:tournament_detail', tournament_id=tournament.id)
+            response= redirect('game:tournament_detail', tournament_id=tournament.id)
+            return push_url(response,f"/game/tournaments/")  
     else:
         create_tournament_form = CreateTournamentForm()
 
     tournaments = Tournament.objects.all()
 
-    return render(request, template_name, {
+    response= render(request, template_name, {
         'create_tournament_form': create_tournament_form,
         'tournaments': tournaments,
     })
+    return push_url(response,f"/game/tournaments/")   
 
 @login_required(login_url='/users/login/')
 def play_match(request, tournament_id, match_id):
@@ -225,7 +230,7 @@ def game(request: HtmxHttpRequest, party_id, match_id=None) -> HttpResponse:
     template_name = "game/game.html"
     if request.htmx:
         template_name += "#my_htmx_content"
-    return render(request, template_name, {
+    response= render(request, template_name, {
         'party_id': party_id,
         'match_id': match_id,
         'tournament_id': tournament_id,
@@ -233,6 +238,7 @@ def game(request: HtmxHttpRequest, party_id, match_id=None) -> HttpResponse:
         'num_players': party.num_players,
         'show_alerts': False,
     })
+    return push_url(response,f"/game/game/")  
 
 @login_required(login_url='/users/login/')
 def lobby(request: HtmxHttpRequest) -> HttpResponse:
@@ -250,7 +256,7 @@ def lobby(request: HtmxHttpRequest) -> HttpResponse:
             template_name = "game/game.html"
             if request.htmx:
                 template_name += "#my_htmx_content"
-            return render(request, template_name, {
+            response= render(request, template_name, {
                 'party_id': None,
                 'match_id': None,
                 'tournament_id': None,
@@ -258,12 +264,13 @@ def lobby(request: HtmxHttpRequest) -> HttpResponse:
                 'num_players': 1,
                 'show_alerts': False,
             })
+            return push_url(response,'')   
         # Vérifier si num_players est 0 (jeu local)
         elif num_players == 0:
             template_name = "game/game.html"
             if request.htmx:
                 template_name += "#my_htmx_content"
-                return render(request, template_name, {
+                response= render(request, template_name, {
                 'party_id': None,
                 'match_id': None,
                 'tournament_id': None,
@@ -271,6 +278,7 @@ def lobby(request: HtmxHttpRequest) -> HttpResponse:
                 'num_players': 0,
                 'show_alerts': False,
             })
+            return push_url(response,f"/game/lobby/")   
         
         # If the form is valid, save the party
         if form.is_valid():
@@ -285,8 +293,7 @@ def lobby(request: HtmxHttpRequest) -> HttpResponse:
             template_name = "game/game.html"
             if request.htmx:
                 template_name += "#my_htmx_content"
-            return render(request, template_name, {
-                'show_alerts' : False,
+            response= render(request, template_name, {
                 'party_id': party.id,
                 #'match_id': match_id,
                 #'tournament_id': tournament_id,
@@ -294,6 +301,7 @@ def lobby(request: HtmxHttpRequest) -> HttpResponse:
                 'num_players': party.num_players,
                 'show_alerts': False,
             })
+            return push_url(response,f"/game/lobby/")   
             #return redirect('game:game', party_id=party.id)  # Redirect to the game
             ##return HttpResponseClientRedirect('game/game.html', party_id=party.id)  # Redirect to the game
             ##return render(request,'game/game.html', {'party_id' : party.id})  # Redirect to the game
@@ -305,14 +313,14 @@ def lobby(request: HtmxHttpRequest) -> HttpResponse:
     template_name = "game/lobby.html"
     if request.htmx:
         template_name += "#my_htmx_content"
-        
     parties = Party.objects.exclude(status='completed').order_by('id').reverse()
-    return render(request, template_name, {
+    response=render(request, template_name, {
         'show_alerts': False,
         'form': form,
         'parties': parties,
         'num_players': None  # Default to None for GET request
     })
+    return push_url(response,f"/game/lobby/")   
 
 
 ################################################################################

@@ -1,9 +1,13 @@
 {% extends 'home.html' %}
+<!-- fred -->
+{% load partials %}
+<!-- fred -->
 {% load static %}
+<!-- fred -->
+{% partialdef my_htmx_content  %}
+<!-- fred -->
 
-{% block title %}
-	{{ tournament.name }}
-{% endblock %}
+{% block script_body %}<script>document.title = '	{{ tournament.name }}'</script>{% endblock %}
 
 {% block body %}
 <h2 class="mb-4">{{ tournament.name }}</h2>
@@ -23,7 +27,7 @@
 </form>
 {% endif %}
 {% if tournament.status == 'in_progress' %}
-	<a href="{% url 'game:tournament_progress' tournament.id %}" class="btn btn-info mt-3">View Tournament Progress</a>
+	<a hx-target="#app-root" hx-get="{% url 'game:tournament_progress' tournament.id %}" href="{% url 'game:tournament_progress' tournament.id %}" class="btn btn-info mt-3">View Tournament Progress</a>
 {% endif %}
-
 {% endblock %}
+{% endpartialdef %}

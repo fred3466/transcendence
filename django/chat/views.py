@@ -11,9 +11,33 @@ from asgiref.sync import async_to_sync
 from game.models import Party
 import json
 
+#fred
+from dataclasses import dataclass
+from django.http import HttpRequest
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_POST
+from faker import Faker
+from django_htmx.middleware import HtmxDetails
+from django.core.paginator import Paginator
+from django_htmx.http import HttpResponseClientRedirect,push_url
+
+# Typing pattern recommended by django-stubs:
+# https://github.com/typeddjango/django-stubs#how-can-i-create-a-httprequest-thats-guaranteed-to-have-an-authenticated-user
+class HtmxHttpRequest(HttpRequest):
+    htmx: HtmxDetails
+    
+import logging
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger("chat")
+#fred
+
 # Create your views here.
 @login_required
-def chat_page(request):
+def chat_page(request: HtmxHttpRequest):
+    logger.debug("== chat_page")
     profile = Profile.objects.all()
     rooms = Room.objects.all()
     users = User.objects.all()
@@ -24,15 +48,19 @@ def chat_page(request):
             friends = friend_list.friends.all()
         except FriendList.DoesNotExist:
             friends = None
-
-    return render(request, "chat/chat.html", {
+            
+    template_name = "chat/chat.html"
+    if request.htmx:
+        template_name += "#my_htmx_content"
+    return push_url(render(request, template_name, {
         "rooms": rooms,
         "users" : users,
         "profiles": profile,
         "friends" : friends,
-        })
+        }),'')
 
-def room(request, slug):
+def room(request: HtmxHttpRequest, slug):
+    logger.debug("== room")
     room_name=Room.objects.get(slug=slug).name
     messages=Message.objects.filter(room=Room.objects.get(slug=slug))
 
@@ -41,9 +69,13 @@ def room(request, slug):
     other_user = get_object_or_404(User, username=other_username)
     profile = get_object_or_404(Profile, user=other_user)
     context = {"slug":slug, "room_name":room_name, 'messages':messages, 'user_id':request.user.id, 'profile':profile, 'other_user_id':other_user.id}
-    return render(request, "chat/room.html", context)
+    template_name = "chat/room.html"
+    if request.htmx:
+        template_name += "#my_htmx_content"
+    return push_url(render(request, template_name, context),'')
 
-def create_room(request):
+def create_room(request: HtmxHttpRequest):
+    logger.debug("== create_room")
     if request.method == "POST":
         # Assuming 'name' and 'slug' are provided in the form submission
         name = request.POST.get('name')
@@ -56,19 +88,25 @@ def create_room(request):
         user1_username = user1.username
         user2_username = user2.username
         room_slug = '_'.join(sorted([user1_username, user2_username]))
+        template_name = "chat/room.html"
+        if request.htmx:
+            template_name += "#my_htmx_content"
 
         existing_room = Room.objects.filter(slug=room_slug).exists()
         if not existing_room:
             # Create a new room
             room = Room.objects.create(name=name, slug=room_slug, user1=user1, user2=user2)
-            return redirect('chat:room', slug=room_slug)
-        else:
+           #return redirect('chat:room', slug=room_slug)
+        #else:
             # Room already exists, redirect to the existing room
-            return redirect('chat:room', slug=room_slug)
+        return push_url(redirect('chat:room', slug=room_slug),'')
+        #context = {"slug":room_slug}
+        #return render(request,template_name, context)
 
 @login_required
 @csrf_exempt  # Be cautious with csrf_exempt; ensure security
-def send_game_invite(request):
+def send_game_invite(request: HtmxHttpRequest):
+    logger.debug("== send_game_invite")
     if request.method == 'POST':
         data = json.loads(request.body)
         room_slug = data.get('room_slug')

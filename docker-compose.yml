@@ -15,6 +15,11 @@ services:
     depends_on:
       - db
       - vault
+    ports:
+      - "8000:8000"
+      - "9999:9999"
+    extra_hosts:
+          - "host.docker.internal:host-gateway"
     env_file: .env
     volumes:
       - ./django:/django

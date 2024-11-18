@@ -17,3 +17,4 @@ hvac
 django-htmx
 django-template-partials
 faker
+#pydevd-pycharm~=243.21565.199

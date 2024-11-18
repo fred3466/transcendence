@@ -89,8 +89,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 client = hvac.Client(url='http://vault:8200', token='roottoken')
 
 # Read secrets from Vault using KV v2 API
-secrets = client.secrets.kv.v2.read_secret_version(path='django', mount_point='secret')
-
+secrets = client.secrets.kv.v2.read_secret_version(path='django', mount_point='secret',raise_on_deleted_version=False)
 # Database configuration using secrets from Vault
 DATABASES = {
     'default': {
@@ -188,6 +187,11 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
+        },
+        'chat': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
         'game': {
             'handlers': ['console'],

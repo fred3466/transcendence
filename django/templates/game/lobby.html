@@ -3,10 +3,7 @@
 {% load static %}
 {% partialdef my_htmx_content inline %}
 
-{% block title %}
-    Lobby
-{% endblock %}
-
+{% block script_body %}<script>document.title = 'Lobby'</script>{% endblock %}
 {% block body %}
 <div class="lobby-menu">
     <h3>Lobby menu</h3>
@@ -77,7 +74,7 @@
                         <th scope="row">{{ party.id }}</th>
                         <td>{{ party.nbPlayer }}</td>
                         <td>{{ party.num_players }}</td>
-                        <td><a hx-get="{% url 'game:game' party.id %}" href="{% url 'game:game' party.id %}">JOIN</a></td>
+                        <td><a  hx-target="#app-root" hx-get="{% url 'game:game' party.id %}" href="{% url 'game:game' party.id %}">JOIN</a></td>
                     </tr>
                 {% elif party.status == 'in_progress' %}
                     <tr>

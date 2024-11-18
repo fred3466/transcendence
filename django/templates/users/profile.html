@@ -1,9 +1,6 @@
 {% extends 'home.html' %}
 {% load static %}
 
-{% block title %}
-	{{ username | capfirst}} (Profile)
-{% endblock %}
 
 {% block styles %}
 	<link rel="stylesheet" href="{% static 'css/users.css' %}">
@@ -296,7 +293,7 @@
 {% endblock %}
 
 {% block script_body %}
-
+    document.title = 'Profile';
 	<script type="text/javascript" src="{% static 'js/friendrequests.js' %}"></script>
 
 {% endblock %}

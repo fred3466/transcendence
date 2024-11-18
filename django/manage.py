@@ -2,7 +2,12 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-
+#fred
+"""
+import pydevd_pycharm
+pydevd_pycharm.settrace('127.0.0.1', port=9999, stdoutToServer=True, stderrToServer=True)
+"""
+#fred
 def main():
 	"""Run administrative tasks."""
 	os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'project.settings')

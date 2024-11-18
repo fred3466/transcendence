@@ -1,9 +1,7 @@
 {% extends 'home.html' %}
 {% load static %}
 
-{% block title %}
-	{{ tournament.name }} Progress
-{% endblock %}
+{% block script_body %}<script>document.title = '	{{ tournament.name }} Progress'</script>{% endblock %}
 
 {% block body %}
 <h2 class="text-center">Tournament : {{ tournament.name }}</h2>

@@ -29,7 +29,7 @@ done
 
 # Proceed to start Django application
 echo "Starting Django application..."
-python3 -m pip install --no-cache-dir daphne
+#python3 -m pip install --no-cache-dir daphne
 python3 manage.py makemigrations
 python3 manage.py migrate
 python3 manage.py runserver 0.0.0.0:8000

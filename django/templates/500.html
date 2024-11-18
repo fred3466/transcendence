@@ -2,9 +2,7 @@
 
 {% load static %}
 
-{% block title %}
-    500 - Server error
-{% endblock %}
+{% block script_body %}<script>document.title = '500 - Server error'</script>{% endblock %}
 
 {% block body %}
     <h1>500 - Server Error</h1>

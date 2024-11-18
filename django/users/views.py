@@ -19,6 +19,28 @@ from django.template.loader import render_to_string
 from render_block import render_block_to_string
 from django.middleware.csrf import get_token
 from game.models import LeaderboardEntry
+#fred
+from dataclasses import dataclass
+from django.http import HttpRequest
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_POST
+from faker import Faker
+from django_htmx.middleware import HtmxDetails
+from django.core.paginator import Paginator
+from django_htmx.http import HttpResponseClientRedirect,push_url
+
+# Typing pattern recommended by django-stubs:
+# https://github.com/typeddjango/django-stubs#how-can-i-create-a-httprequest-thats-guaranteed-to-have-an-authenticated-user
+class HtmxHttpRequest(HttpRequest):
+    htmx: HtmxDetails
+    
+import logging
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger("users")
+#fred
 
 # Load environment variables
 load_dotenv()
@@ -43,7 +65,7 @@ def build_authorize_uri(state_value):
 
 # Update your views to use the new build_authorize_uri function
 @require_http_methods(['GET', 'POST'])
-def signup_v(request) -> HttpResponse:
+def signup_v(request: HtmxHttpRequest) -> HttpResponse:
     context = {
         'authorize_uri': build_authorize_uri(FROMSIGNUP),
         'show_alerts': True,
@@ -60,10 +82,10 @@ def signup_v(request) -> HttpResponse:
         form = UserRegisterForm()
     context['form'] = form
 
-    return render(request, 'users/signup.html', context)
+    return push_url(render(request, 'users/signup.html', context),'')
 
 @require_http_methods(['GET', 'POST'])
-def login_v(request) -> HttpResponse:
+def login_v(request: HtmxHttpRequest) -> HttpResponse:
     context = {
         'authorize_uri': build_authorize_uri(FROMLOGIN),
         'show_alerts': True,
@@ -76,11 +98,11 @@ def login_v(request) -> HttpResponse:
             user.profile.active = True
             login(request, user)
             context['request'] = request
-            return render(request, 'home/welcome.html', context)
+            return push_url(render(request, 'home/welcome.html', context))
     else:
         form = AuthenticationForm()
     context['form'] = form
-    return render(request, 'users/login.html', context)
+    return push_url(render(request, 'users/login.html', context),'')
 
 
 """
@@ -90,7 +112,7 @@ catches tmp_code, exchanges it for an access token, use that
 token to get user informations
 """
 @require_GET
-def callback(request) -> None:
+def callback(request: HtmxHttpRequest) -> None:
     page_origin = request.GET.get('state')
     authorization_code = request.GET.get('code')
     if authorization_code is None:
@@ -140,7 +162,7 @@ def callback(request) -> None:
         return redirect('users:login')
 
 @require_POST
-def logout_v(request) -> None:
+def logout_v(request: HtmxHttpRequest) -> None:
     if request.method == 'POST':
         user = request.user
         user.profile.active = False
@@ -155,7 +177,7 @@ def logout_v(request) -> None:
 Profile view of current user or another one
 """
 @login_required(login_url='/users/login/?redirected=true')
-def profile(request, username: str) -> HttpResponse:
+def profile(request: HtmxHttpRequest, username: str) -> HttpResponse:
     context = {}
     try:
         displayed_user = User.objects.get(username=username)
@@ -239,24 +261,24 @@ def profile(request, username: str) -> HttpResponse:
         context['my_csrf'] = get_token(request)
         b_body = render_block_to_string('users/profile.html', 'body', context)
         b_script = render_block_to_string('users/profile.html', 'script_body', context)
-        return HttpResponse(b_body + b_script)
+        return push_url(HttpResponse(b_body + b_script),'')
 
-    return render(request, 'users/profile.html', context)
+    return push_url(render(request, 'users/profile.html', context),'')
 
 """
 Logic for deleting a user > profile > friendlist
 """
 @login_required(login_url='/users/login/?redirected=true')
-def deleteprofile(request, username: str) -> None:
+def deleteprofile(request: HtmxHttpRequest, username: str) -> None:
     # Ensure the user is deleting their own profile or is a superuser
     if request.user.username != username and not request.user.is_superuser:
-        return render(request, '404.html')
+        return push_url(render(request, '404.html'),'')
 
     # Retrieve the user instance
     try:
         user_to_delete = User.objects.get(username=username)
     except User.DoesNotExist:
-        return render(request, '500.html', {'message': 'User not found'})
+        return push_url(render(request, '500.html', {'message': 'User not found'}),'')
     
     # Delete the user instance
     user_to_delete.delete()
@@ -266,7 +288,7 @@ def deleteprofile(request, username: str) -> None:
 Settings page for editing user info
 """
 @login_required(login_url='/users/login/?redirected=true')
-def editprofile(request) -> HttpResponse:
+def editprofile(request: HtmxHttpRequest) -> HttpResponse:
     context = {
         'request': request,
     }
@@ -290,13 +312,13 @@ def editprofile(request) -> HttpResponse:
     if 'HTTP_HX_REQUEST' in request.META:
         context['request'] = request
         b_body = render_block_to_string('users/editprofile.html', 'body', context)
-        return HttpResponse(b_body)
-    return render(request, 'users/editprofile.html', context)
+        return push_url(HttpResponse(b_body),'')
+    return push_url(render(request, 'users/editprofile.html', context),'')
 
 """"
 Friend Request System
 """
-def send_friend_request(request) -> HttpResponse:
+def send_friend_request(request: HtmxHttpRequest) -> HttpResponse:
     user = request.user
     payload = {}
     if request.method == 'POST' and user.is_authenticated:
@@ -332,9 +354,9 @@ def send_friend_request(request) -> HttpResponse:
             payload['response'] = "Unable to send a friend request."
     else:
         payload['response'] = "You must be authenticated to send a friend request."
-    return HttpResponse(json.dumps(payload), content_type="application/json")
+    return push_url(HttpResponse(json.dumps(payload), content_type="application/json"),'')
 
-def accept_friend_request(request, *args, **kwargs) -> HttpResponse:
+def accept_friend_request(request: HtmxHttpRequest, *args, **kwargs) -> HttpResponse:
     user = request.user
     payload = {}
     if request.method == "GET" and user.is_authenticated:
@@ -355,9 +377,9 @@ def accept_friend_request(request, *args, **kwargs) -> HttpResponse:
             payload['response'] = 'Unable to accept that friend request'
     else:
         payload['response'] = 'You must be authenticated to accept a friend request'
-    return HttpResponse(json.dumps(payload), content_type="application/json")
+    return push_url(HttpResponse(json.dumps(payload), content_type="application/json"),'')
 
-def decline_friend_request(request, *args, **kwargs) -> HttpResponse:
+def decline_friend_request(request: HtmxHttpRequest, *args, **kwargs) -> HttpResponse:
     user = request.user
     payload = {}
     if request.method == "GET" and user.is_authenticated:
@@ -378,9 +400,9 @@ def decline_friend_request(request, *args, **kwargs) -> HttpResponse:
             payload['response'] = "Unable to decline that friend request"
     else:
         payload['response'] = "You must be authenticated to decline a friend request"
-    return HttpResponse(json.dumps(payload), content_type="application/json")
+    return push_url(HttpResponse(json.dumps(payload), content_type="application/json"),'')
 
-def cancel_friend_request(request) -> HttpResponse:
+def cancel_friend_request(request: HtmxHttpRequest) -> HttpResponse:
     user = request.user
     payload = {}
     if request.method == "POST" and user.is_authenticated:
@@ -406,9 +428,9 @@ def cancel_friend_request(request) -> HttpResponse:
             payload['response'] = "Unable to cancel that friend request"
     else:
             payload['response'] = "You must be authenticated to cancel a friend requests"
-    return HttpResponse(json.dumps(payload), content_type="application/json")
+    return push_url(HttpResponse(json.dumps(payload), content_type="application/json"),'')
 
-def remove_friend(request) -> HttpResponse:
+def remove_friend(request: HtmxHttpRequest) -> HttpResponse:
     user = request.user
     payload = {}
     if request.method == "POST" and user.is_authenticated:
@@ -425,9 +447,9 @@ def remove_friend(request) -> HttpResponse:
             payload['response'] = "There was an error. Unable to remove that friend"
     else:
         payload['response'] = "You must be authenticated to remove a friend"
-    return HttpResponse(json.dumps(payload), content_type="application/json")
+    return push_url(HttpResponse(json.dumps(payload), content_type="application/json"),'')
 
-def blocking(request) -> HttpResponse:
+def blocking(request: HtmxHttpRequest) -> HttpResponse:
     current_user = request.user
     blocklist = current_user.profile.blocklist
     action = request.GET.get("action") or request.POST.get("action")
@@ -465,4 +487,4 @@ def blocking(request) -> HttpResponse:
             payload['response'] = 'No user ID in the request'
     else:
         payload['response'] = 'User is not authenticated'
-    return HttpResponse(json.dumps(payload), content_type="application/json")
+    return push_url(HttpResponse(json.dumps(payload), content_type="application/json"),'')

@@ -2,17 +2,17 @@
 <!-- fred -->
 {% load partials %}
 <!-- fred -->
+{% partialdef my_htmx_content %}
 {% load static %}
 
-{% block title %}
-    Tournaments
+{% block script_body %}
+    <script>document.title = 'Tournaments'</script>    
 {% endblock %}
 
 {% block body %}
 <!-- fred -->
-{% partialdef my_htmx_content inline %}
 <!-- fred -->
-<div class="tournament-list" >    
+<div class="tournament-list" id="tournament-list-div" >
     <!-- Create Tournament Form -->
     <div class="create-tournament-form mb-4">
         <h3 class="text-center mb-3">Create a New Tournament</h3>
@@ -50,12 +50,12 @@
                         {% elif tournament.status != 'waiting' %}
                             <a></a>
                         {% else %}
-                            <a href="{% url 'game:join_tournament' tournament.id %}" class="btn btn-sm btn-secondary me-2">Join</a>
+                            <a hx-target="#app-root" hx-get="{% url 'game:join_tournament' tournament.id %}" href="{% url 'game:join_tournament' tournament.id %}" class="btn btn-sm btn-secondary me-2">Join</a>
                         {% endif %}
                         {% if tournament.status == 'completed' %}
-                            <a href="{% url 'game:tournament_progress' tournament.id %}" class="btn btn-sm btn-info">View</a>
+                            <a hx-target="#app-root" hx-get="{% url 'game:tournament_progress' tournament.id %}" href="{% url 'game:tournament_progress' tournament.id %}" class="btn btn-sm btn-info">View</a>
                         {% else %}
-                            <a href="{% url 'game:tournament_detail' tournament.id %}" class="btn btn-sm btn-info">Details</a>
+                            <a hx-target="#app-root"  hx-get="{% url 'game:tournament_detail' tournament.id %}" href="{% url 'game:tournament_detail' tournament.id %}" class="btn btn-sm btn-info">Details</a>
                         {% endif %}
                     </td>
                 </tr>
@@ -67,5 +67,5 @@
         </tbody>
     </table>
 </div>
-  {% endpartialdef %}
 {% endblock %}
+  {% endpartialdef %}

@@ -1,7 +1,11 @@
 {% extends 'home.html' %}
-{% block title %}
-Chat
-{% endblock %}
+<!-- fred -->
+{% load partials %}
+<!-- fred -->
+<!-- fred -->
+{% partialdef my_htmx_content %}
+<!-- fred -->
+
 {% block styles %}
 <style>
     .user-container {
@@ -71,6 +75,7 @@ Chat
 {% endblock %}
 {% block script_body %}
     <script>
+    document.title = 'Chat'
         function generateRoom(userId) {
             var formId = "create-room-form-" + userId;
             var name = "Room " + Math.floor(Math.random() * 1000);
@@ -83,3 +88,4 @@ Chat
         }
     </script>
 {% endblock %}
+{% endpartialdef %}

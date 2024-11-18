@@ -12,6 +12,6 @@ COPY . .
 
 RUN chmod +x /django/launch.sh
 
-EXPOSE 8000
+EXPOSE 8000 9999
 
 CMD [ "/bin/bash", "/django/launch.sh" ]

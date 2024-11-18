@@ -1,7 +1,4 @@
 {% extends 'home.html' %}
-{% block title %}
-Chat
-{% endblock %}
 {% block styles %}
 <style>
   .chat__item__container {
@@ -148,6 +145,7 @@ Chat
 {% endblock %}
 {% block script_body %}
 <script>
+  document.title = 'Chat';
   const roomSlug = "{{ slug }}";
   const roomName = "{{ room_name }}";
   const username = "{{ request.user.username }}";

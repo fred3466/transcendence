@@ -1,0 +1,29 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Trans django dans docker compose" type="Python.DjangoServer" factoryName="Django server" singleton="true" show_console_on_std_err="true" show_console_on_std_out="true">
+    <module name="ft_transcendence" />
+    <option name="ENV_FILES" value="$PROJECT_DIR$/.env" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="PARENT_ENVS" value="true" />
+    <envs>
+      <env name="PYTHONUNBUFFERED" value="1" />
+      <env name="VAULT_ADDR" value="'http://0.0.0.0:8200'" />
+      <env name="DJANGO_SETTINGS_MODULE" value="django.project.settings" />
+    </envs>
+    <option name="SDK_HOME" value="" />
+    <option name="SDK_NAME" value="Remote Python 3.12.6 Docker Compose (django)" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/django" />
+    <option name="IS_MODULE_SDK" value="false" />
+    <option name="ADD_CONTENT_ROOTS" value="true" />
+    <option name="ADD_SOURCE_ROOTS" value="true" />
+    <option name="launchJavascriptDebuger" value="false" />
+    <option name="port" value="8000" />
+    <option name="host" value="0.0.0.0" />
+    <option name="additionalOptions" value="" />
+    <option name="browserUrl" value="" />
+    <option name="runTestServer" value="true" />
+    <option name="runNoReload" value="false" />
+    <option name="useCustomRunCommand" value="false" />
+    <option name="customRunCommand" value="" />
+    <method v="2" />
+  </configuration>
+</component>
