@@ -19,7 +19,7 @@
                         <li><a  hx-push-url="true" hx-get="{% url 'game:lobby' %}" href="{% url 'game:lobby' %}" hx-target="#app-root">Game</a></li>
                         <li><a  hx-push-url="true" hx-get="{% url 'game:tournament_list' %}" href="{% url 'game:tournament_list' %}" hx-target="#app-root">Tournaments</a></li>
                         <li><a  hx-push-url="true" hx-get="{% url 'chat:home' %}" href="{% url 'chat:home' %}" hx-target="#app-root">Chat</a></li>
-                        <li><a  hx-push-url="true" hx-get="{% url 'users:profile' %}{{request.user.username}}" href="{% url 'users:profile' %}{{request.user.username}}" hx-target="#app-root">Profile</a></li>
+                        <li><a  hx-push-url="true" hx-get="{% url 'users:profile' %}{{request.user.username}}" href="{% url 'users:profile' %}{{request.user.username}}" hx-target="#app-root">{{ request.user.username }}</a></li>
                     {% endif %}
                 </ul>
             </nav>

@@ -1,11 +1,11 @@
 {% extends 'home.html' %}
-<!-- fred -->
+
 {% load partials %}
-<!-- fred -->
+
 {% load static %}
-<!-- fred -->
+
 {% partialdef my_htmx_content  %}
-<!-- fred -->
+
 
 {% block script_body %}{% endblock %}
 
@@ -22,7 +22,7 @@
 </div>
 
 {% if can_start %}
-<form method="post" action="{% url 'game:start_tournament' tournament.id %}">
+<form hx-boost="false" hx-target="#app-root" hx-post="{% url 'game:start_tournament' tournament.id %}">
     {% csrf_token %}
     <button type="submit">Start Tournament</button>
 </form>

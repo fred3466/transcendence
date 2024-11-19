@@ -1,10 +1,6 @@
 {% extends 'home.html' %}
-<!-- fred -->
 {% load partials %}
-<!-- fred -->
-<!-- fred -->
 {% partialdef my_htmx_content %}
-<!-- fred -->
 
 {% block styles %}
 <style>
@@ -54,7 +50,7 @@
                     {% endif %}
                     <img src="{{ i.profile.image.url }}" alt="User Image" class="user-image">
                     <span>{{ i.profile.user.username }}</span>
-                    <form id="create-room-form-{{ i.profile.user.id }}" action="{% url 'chat:create_room' %}" method="post" class="user-form">
+                    <form id="create-room-form-{{ i.profile.user.id }}" hx-target="#app-root" hx-post="{% url 'chat:create_room' %}" class="user-form">
                         {% csrf_token %}
                         <input type="hidden" name="name" value="">
                         <input type="hidden" name="slug" value="">

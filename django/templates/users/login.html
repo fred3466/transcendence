@@ -19,7 +19,7 @@
                 <h1>Welcome Back</h1>
                 <p>Not registered yet? <a href="{% url 'users:signup'%}">Sign up</a></p>
                 <hr>
-               <form hx-push-url="/" hx-post="{% url 'users:login' %}" hx-target="#app-body" hx-push-url="true">
+               <form hx-push-url="/" hx-post="{% url 'users:login' %}" hx-target="#app-body">
                      <div class="form_inputs">
                         {% csrf_token %}
                         {{ form | crispy }}

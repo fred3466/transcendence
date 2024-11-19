@@ -5,16 +5,11 @@
 {% partialdef my_htmx_content inline %}
 {% load static %}
 
-
-
-{% block script_body %}
-{% endblock %}
-
 {% block styles %}
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 {% endblock %}
 
-{% block script %}
+{% block script_body %}
 <script>document.title = 'Game f'</script>
 <script>
     const user = '{{ user.username|escapejs }}';

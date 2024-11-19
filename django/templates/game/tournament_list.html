@@ -1,20 +1,17 @@
 {% extends 'home.html' %}
-<!-- fred -->
+
 {% load partials %}
-<!-- fred -->
+
 {% partialdef my_htmx_content %}
 {% load static %}
 
 
 {% block body %}
-    <script>document.title = 'Tournaments'</script>    
-<!-- fred -->
-<!-- fred -->
 <div class="tournament-list" id="tournament-list-div" >
     <!-- Create Tournament Form -->
     <div class="create-tournament-form mb-4">
         <h3 class="text-center mb-3">Create a New Tournament</h3>
-        <form method="post" action="{% url 'game:tournament_list' %}">
+        <form hx-boost="false" hx-target="#app-root" hx-post="{% url 'game:tournament_list' %}">
             {% csrf_token %}
             {{ create_tournament_form.as_p }}
             <div class="d-flex justify-content-center">
@@ -65,5 +62,6 @@
         </tbody>
     </table>
 </div>
+<script>document.title = 'Tournaments'</script>   
 {% endblock %}
   {% endpartialdef %}

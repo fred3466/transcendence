@@ -59,15 +59,6 @@ def submit_game_result(request):
     except json.JSONDecodeError:
         return HttpResponseBadRequest("Invalid JSON.")
 
-@login_required(login_url='/users/login/')
-def join_tournament(request, tournament_id):
-    logger.debug("== join_tournament")
-    tournament = get_object_or_404(Tournament, id=tournament_id)
-    if tournament.status != 'waiting':
-        return HttpResponseForbidden("Cannot join a tournament that is not active.")
-    tournament.players.add(request.user)
-    return redirect('game:tournament_detail', tournament_id=tournament.id)
-
 
 def create_matchups(tournament):
     logger.debug("== create_matchups")
@@ -114,6 +105,20 @@ def create_matchups(tournament):
 ################################################################################
 ###     TOURNAMENT
 ################################################################################
+
+@login_required(login_url='/users/login/')
+def join_tournament(request: HtmxHttpRequest, tournament_id):
+    logger.debug("== join_tournament tournament_id="+str(tournament_id))
+    # template_name = "game/tournament_progress.html"
+    # if request.htmx:
+    #     template_name += "#my_htmx_content"
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    if tournament.status != 'waiting':
+        return HttpResponseForbidden("Cannot join a tournament that is not active.")
+    tournament.players.add(request.user)
+    # return redirect('game:tournament_detail', tournament_id=tournament.id)
+    return push_url(redirect('game:tournament_progress', tournament_id=tournament.id),'')
+
 @require_POST
 @login_required(login_url='/users/login/')
 def start_tournament(request: HtmxHttpRequest, tournament_id):
@@ -132,11 +137,20 @@ def start_tournament(request: HtmxHttpRequest, tournament_id):
         tournament.save()
         create_matchups(tournament)  # Ensure this is a synchronous call
 
+    matches = tournament.matches.all()  # assuming a related matches field
+
+    # Add a participant check to each match
+    for match in matches:
+        match.is_participant = request.user == match.player1 or request.user == match.player2
+
     context = {
         'tournament_id': tournament.id,
+        'tournament': tournament,
+        'matches': matches,
     }
-    # return push_url(render(request, template_name, context),'')
-    return redirect('game:tournament_progress', tournament_id=tournament.id)
+    return push_url(render(request, template_name, context),'')
+    # return push_url(redirect('game:tournament_progress', tournament_id=tournament.id),'')
+    # return redirect('game:tournament_progress', tournament_id=tournament.id)
 
 @login_required(login_url='/users/login/')
 def tournament_progress(request: HtmxHttpRequest, tournament_id):
@@ -186,10 +200,10 @@ def tournament_list(request: HtmxHttpRequest) -> HttpResponse:
             tournament.creator = request.user
             tournament.save()
             tournament.players.add(request.user)
-            response= redirect('game:tournament_detail', tournament_id=tournament.id)
-            return push_url(response,f"/game/tournaments/")  
-    else:
-        create_tournament_form = CreateTournamentForm()
+            logger.debug("== tournament_list tournament saved")
+            # response= redirect('game:tournament_detail', tournament_id=tournament.id)
+    # else:
+    create_tournament_form = CreateTournamentForm()
 
     tournaments = Tournament.objects.all().order_by('id').reverse()
 
@@ -197,11 +211,11 @@ def tournament_list(request: HtmxHttpRequest) -> HttpResponse:
         'create_tournament_form': create_tournament_form,
         'tournaments': tournaments,
     })
-    return push_url(response,f"/game/tournaments/")   
+    return push_url(response,'')   
 
 @login_required(login_url='/users/login/')
 def play_match(request: HtmxHttpRequest, tournament_id, match_id):
-    logger.debug("== play_match")
+    logger.debug("== play_match tournament_id="+str(tournament_id)+" match_id="+str(match_id))
     template_name = "game/game.html"
     if request.htmx:
         template_name += "#my_htmx_content"
@@ -229,6 +243,7 @@ def play_match(request: HtmxHttpRequest, tournament_id, match_id):
     response= render(request, template_name, {
         'party_id': party.id,
         'match_id': matche.id,
+        'tournament_id': matche.tournament.id,
     })
     return push_url(response,'')
     # return redirect('game:game_with_match', party_id=party.id, match_id=matche.id,)
@@ -243,8 +258,8 @@ def game(request: HtmxHttpRequest, party_id, match_id=None) -> HttpResponse:
     party = get_object_or_404(Party, id=party_id)
     tournament_id = None
     if match_id:
-        match = get_object_or_404(TournamentMatch, id=match_id)
-        tournament_id = match.tournament.id
+        matche = get_object_or_404(TournamentMatch, id=match_id)
+        tournament_id = matche.tournament.id
         
     template_name = "game/game.html"
     if request.htmx:

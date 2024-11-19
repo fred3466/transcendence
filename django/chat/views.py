@@ -34,9 +34,33 @@ import logging
 logger = logging.getLogger("chat")
 #fred
 
-# Create your views here.
+# # Create your views here.
+# @login_required
+# def chat_page(request: HtmxHttpRequest):
+#     logger.debug("== chat_page")
+#     profile = Profile.objects.all()
+#     rooms = Room.objects.all()
+#     users = User.objects.all()
+#     current_user = request.user
+#     if current_user.is_authenticated:
+#         try:
+#             friend_list = FriendList.objects.get(user=current_user)
+#             friends = friend_list.friends.all()
+#         except FriendList.DoesNotExist:
+#             friends = None
+#
+#     template_name = "chat/chat.html"
+#     if request.htmx:
+#         template_name += "#my_htmx_content"
+#     return push_url(render(request, template_name, {
+#         "rooms": rooms,
+#         "users" : users,
+#         "profiles": profile,
+#         "friends" : friends,
+#         }),'')
+
 @login_required
-def chat_page(request: HtmxHttpRequest):
+def chat_page(request):
     logger.debug("== chat_page")
     profile = Profile.objects.all()
     rooms = Room.objects.all()
@@ -48,16 +72,13 @@ def chat_page(request: HtmxHttpRequest):
             friends = friend_list.friends.all()
         except FriendList.DoesNotExist:
             friends = None
-            
-    template_name = "chat/chat.html"
-    if request.htmx:
-        template_name += "#my_htmx_content"
-    return push_url(render(request, template_name, {
+
+    return render(request, "chat/chat.html", {
         "rooms": rooms,
         "users" : users,
         "profiles": profile,
         "friends" : friends,
-        }),'')
+        })
 
 def room(request: HtmxHttpRequest, slug):
     logger.debug("== room")
@@ -94,12 +115,11 @@ def create_room(request: HtmxHttpRequest):
 
         existing_room = Room.objects.filter(slug=room_slug).exists()
         if not existing_room:
-            # Create a new room
             room = Room.objects.create(name=name, slug=room_slug, user1=user1, user2=user2)
            #return redirect('chat:room', slug=room_slug)
         #else:
             # Room already exists, redirect to the existing room
-        return push_url(redirect('chat:room', slug=room_slug),'')
+        return push_url(render(request, template_name, {'slug': room_slug}),'')
         #context = {"slug":room_slug}
         #return render(request,template_name, context)
 

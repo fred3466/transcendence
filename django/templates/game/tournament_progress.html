@@ -1,10 +1,9 @@
 {% extends 'home.html' %}
 {% load partials %}
 
+{% partialdef my_htmx_content inline %}
 {% load static %}
 
-{% block script_body %}{% endblock %}
-{% partialdef my_htmx_content inline %}
 
 <script>document.title = '{{ tournament.name }} Progress'</script>
 
@@ -40,7 +39,7 @@
             {% if match.status == 'completed' %}
             - Winner: {{ match.winner.username }}
             {% elif match.status == 'pending' and match.is_participant %}
-                - <a href="{% url 'game:play_match' tournament.id match.id %}">Play Now</a>
+                - <a hx-target="#app-root" hx-push-url="true"  hx-get="{% url 'game:play_match' tournament.id match.id %}">Play Now</a>
             {% else %}
                 - <em>Waiting for players</em>
             {% endif %}

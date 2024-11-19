@@ -1,4 +1,7 @@
 {% extends 'home.html' %}
+{% load partials %}
+
+{% partialdef my_htmx_content inline %}
 {% block styles %}
 <style>
   .chat__item__container {
@@ -297,3 +300,4 @@
 
 </script>
 {% endblock %}
+{% endpartialdef %}
