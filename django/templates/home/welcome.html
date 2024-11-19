@@ -1,15 +1,13 @@
 {% extends 'home.html' %}
 {% load partials %}
 
-{% load static %}
 {% partialdef my_htmx_content inline %}
-
-{% block script_body %}
-{% endblock %}
+{% load static %}
 
 {% block body %}
+<script>document.title = 'Home'</script>
+
 	<h1>Home page</h1>
-	<script>document.title = 'Home'</script>
 {% endblock %}
 
 {% endpartialdef %}

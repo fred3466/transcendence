@@ -30,6 +30,17 @@ import logging
 logger = logging.getLogger("home")
 #fred
 
+# @login_required(login_url='/users/login/?redirected=true')
+# def welcome(request):
+#     context = {
+#         "show_alert": True,
+#     }
+#     if 'HTTP_HX_REQUEST' in request.META:
+#         html = render_block_to_string('home/welcome.html', 'body', context)
+#         return HttpResponse(html)
+#     return render(request, 'home/welcome.html', context)
+
+
 @login_required(login_url='/users/login/?redirected=true')
 def welcome(request: HtmxHttpRequest):
     logger.debug("== welcome")
@@ -42,8 +53,6 @@ def welcome(request: HtmxHttpRequest):
     if 'HTTP_HX_REQUEST' in request.META:
         html = render_block_to_string('home/welcome.html', 'body', context)
         return push_url(HttpResponse(html),'')
-    
-
     return push_url(render(request, template_name, context),'')
 
 def leaderboard(request: HtmxHttpRequest):

@@ -1,9 +1,8 @@
 {% extends 'home.html' %}
 {% load partials %}
 {% load static %}
+{% partialdef my_htmx_content inline %}
 
-{% block script_body %}
-{% endblock %}
 
 {% block body %}
 	<main class="table">
@@ -39,3 +38,4 @@
 
 	<script type="text/javascript">document.title = 'Leaderboard';</script>
 {% endblock %}
+{% endpartialdef %}

@@ -5,11 +5,9 @@
 {% partialdef my_htmx_content %}
 {% load static %}
 
-{% block script_body %}
-    <script>document.title = 'Tournaments'</script>    
-{% endblock %}
 
 {% block body %}
+    <script>document.title = 'Tournaments'</script>    
 <!-- fred -->
 <!-- fred -->
 <div class="tournament-list" id="tournament-list-div" >
@@ -50,12 +48,12 @@
                         {% elif tournament.status != 'waiting' %}
                             <a></a>
                         {% else %}
-                            <a hx-target="#app-root" hx-get="{% url 'game:join_tournament' tournament.id %}" href="{% url 'game:join_tournament' tournament.id %}" class="btn btn-sm btn-secondary me-2">Join</a>
+                            <a hx-target="#app-root" hx-push-url="true" hx-get="{% url 'game:join_tournament' tournament.id %}" href="{% url 'game:join_tournament' tournament.id %}" class="btn btn-sm btn-secondary me-2">Join</a>
                         {% endif %}
                         {% if tournament.status == 'completed' %}
-                            <a hx-target="#app-root" hx-get="{% url 'game:tournament_progress' tournament.id %}" href="{% url 'game:tournament_progress' tournament.id %}" class="btn btn-sm btn-info">View</a>
+                            <a hx-target="#app-root" hx-push-url="true" hx-get="{% url 'game:tournament_progress' tournament.id %}" href="{% url 'game:tournament_progress' tournament.id %}" class="btn btn-sm btn-info">View</a>
                         {% else %}
-                            <a hx-target="#app-root"  hx-get="{% url 'game:tournament_detail' tournament.id %}" href="{% url 'game:tournament_detail' tournament.id %}" class="btn btn-sm btn-info">Details</a>
+                            <a hx-target="#app-root" hx-push-url="true" hx-get="{% url 'game:tournament_detail' tournament.id %}" href="{% url 'game:tournament_detail' tournament.id %}" class="btn btn-sm btn-info">Details</a>
                         {% endif %}
                     </td>
                 </tr>

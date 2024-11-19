@@ -1,7 +1,12 @@
 {% extends 'home.html' %}
+{% load partials %}
+
 {% load static %}
 
-{% block script_body %}<script>document.title = '	{{ tournament.name }} Progress'</script>{% endblock %}
+{% block script_body %}{% endblock %}
+{% partialdef my_htmx_content inline %}
+
+<script>document.title = '{{ tournament.name }} Progress'</script>
 
 {% block body %}
 <h2 class="text-center">Tournament : {{ tournament.name }}</h2>
@@ -43,3 +48,5 @@
     {% endfor %}
 {% endif %}
 {% endblock %}
+
+{% endpartialdef %}

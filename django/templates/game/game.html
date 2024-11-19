@@ -2,18 +2,20 @@
 
 {% extends 'home.html' %}
 {% load partials %}
+{% partialdef my_htmx_content inline %}
 {% load static %}
 
-{% partialdef my_htmx_content inline %}
 
 
-{% block script_body %}<script>document.title = 'Game'</script>{% endblock %}
+{% block script_body %}
+{% endblock %}
 
 {% block styles %}
     <link rel="stylesheet" href="{% static 'styles.css' %}">
 {% endblock %}
 
 {% block script %}
+<script>document.title = 'Game f'</script>
 <script>
     const user = '{{ user.username|escapejs }}';
     const party_id = '{{ party_id|escapejs }}';

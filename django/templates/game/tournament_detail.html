@@ -7,9 +7,10 @@
 {% partialdef my_htmx_content  %}
 <!-- fred -->
 
-{% block script_body %}<script>document.title = '	{{ tournament.name }}'</script>{% endblock %}
+{% block script_body %}{% endblock %}
 
 {% block body %}
+<script>document.title = '{{ tournament.name }}'</script>
 <h2 class="mb-4">{{ tournament.name }}</h2>
 <div>
 <p>Players: {{ tournament.players.count }}</p>

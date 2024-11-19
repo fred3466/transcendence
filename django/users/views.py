@@ -89,11 +89,17 @@ def signup_v(request: HtmxHttpRequest) -> HttpResponse:
 @require_http_methods(['GET', 'POST'])
 def login_v(request: HtmxHttpRequest) -> HttpResponse:
     logger.debug("== login_v")
+    template_name = "home/welcome.html"
+    # if request.htmx:
+    #     template_name += "#my_htmx_content"
     context = {
         'authorize_uri': build_authorize_uri(FROMLOGIN),
         'show_alerts': True,
         'request': request
     }
+    if request.user and request.user.is_authenticated:
+        logger.debug("== login_v : déjà identifié => home")
+        return push_url(render(request, template_name, context),'')
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
@@ -101,11 +107,18 @@ def login_v(request: HtmxHttpRequest) -> HttpResponse:
             user.profile.active = True
             login(request, user)
             context['request'] = request
-            return push_url(render(request, 'home/welcome.html', context))
+            logger.debug("== login_v : identification ok")
+            return push_url(render(request, template_name, context),'')
+            # return render(request, 'home/welcome.html', context)
     else:
         form = AuthenticationForm()
     context['form'] = form
-    return push_url(render(request, 'users/login.html', context),'')
+    template_name = "users/login.html"
+    # if request.htmx:
+    #     template_name += "#my_htmx_content"
+    return push_url(render(request, template_name, context),'')
+    # return render(request, 'users/login.html', context)
+
 
 
 """

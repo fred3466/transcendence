@@ -1,8 +1,9 @@
 <!DOCTYPE html>
+{% load partials %}
 {% load django_htmx static %}
+{% partialdef my_htmx_content inline %}
 {% load static %}
 {% load crispy_forms_tags %}
-{% load partials %}
 
 
 <html lang="en">
@@ -22,7 +23,7 @@
         <script src="/static/js/htmx.js" crossorigin="anonymous"></script>
         <script src="https://unpkg.com/htmx-ext-head-support@2.0.1/head-support.js"></script>
 	</head>
-	<body hx-ext="head-support" hx-ext="debug, event-header" hx-headers='{"X-CSRFToken": "{% csrf_token %}"}' id="app-body">
+	<body hx-ext="debug, event-header, head-support" hx-headers='{"X-CSRFToken": "{% csrf_token %}"}' id="app-body">
         {% include './navbar.html' %}
 		<main id="app-root" class="container_global">
 			{% if show_alerts %}
@@ -44,3 +45,4 @@
   {% django_htmx_script %}
 	</body>
 </html>
+{% endpartialdef %}

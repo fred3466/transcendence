@@ -35,7 +35,6 @@ logger = logging.getLogger("game")
 @login_required(login_url='/users/login/')
 def submit_game_result(request):
     logger.debug("== submit_game_result")
-    logger.debug("== submit_game_result")
     try:
         data = json.loads(request.body)
         party_id = data.get('party_id')
@@ -69,38 +68,6 @@ def join_tournament(request, tournament_id):
     tournament.players.add(request.user)
     return redirect('game:tournament_detail', tournament_id=tournament.id)
 
-@require_POST
-@login_required(login_url='/users/login/')
-def start_tournament(request, tournament_id):
-    logger.debug("== start_tournament")
-    tournament = get_object_or_404(Tournament, id=tournament_id)
-    if tournament.creator != request.user:
-        return HttpResponseForbidden("Only the creator can start the tournament.")
-    if tournament.players.count() < 2:
-        return HttpResponseBadRequest("Not enough participants to start the tournament.")
-
-    with transaction.atomic():
-        tournament.status = 'in_progress'
-        tournament.save()
-        create_matchups(tournament)  # Ensure this is a synchronous call
-
-    return redirect('game:tournament_progress', tournament_id=tournament.id)
-
-@login_required(login_url='/users/login/')
-def tournament_progress(request, tournament_id):
-    logger.debug("== tournament_progress")
-    tournament = get_object_or_404(Tournament, id=tournament_id)
-    matches = tournament.matches.all()  # assuming a related matches field
-
-    # Add a participant check to each match
-    for match in matches:
-        match.is_participant = request.user == match.player1 or request.user == match.player2
-
-    context = {
-        'tournament': tournament,
-        'matches': matches,
-    }
-    return render(request, 'game/tournament_progress.html', context)
 
 def create_matchups(tournament):
     logger.debug("== create_matchups")
@@ -147,6 +114,49 @@ def create_matchups(tournament):
 ################################################################################
 ###     TOURNAMENT
 ################################################################################
+@require_POST
+@login_required(login_url='/users/login/')
+def start_tournament(request: HtmxHttpRequest, tournament_id):
+    logger.debug("== start_tournament")
+    template_name = "game/tournament_progress.html"
+    if request.htmx:
+        template_name += "#my_htmx_content"
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    if tournament.creator != request.user:
+        return HttpResponseForbidden("Only the creator can start the tournament.")
+    if tournament.players.count() < 2:
+        return HttpResponseBadRequest("Not enough participants to start the tournament.")
+
+    with transaction.atomic():
+        tournament.status = 'in_progress'
+        tournament.save()
+        create_matchups(tournament)  # Ensure this is a synchronous call
+
+    context = {
+        'tournament_id': tournament.id,
+    }
+    return push_url(render(request, template_name, context),'')
+    #return redirect('game:tournament_progress', tournament_id=tournament.id)
+
+@login_required(login_url='/users/login/')
+def tournament_progress(request: HtmxHttpRequest, tournament_id):
+    logger.debug("== tournament_progress")
+    template_name = "game/tournament_progress.html"
+    if request.htmx:
+        template_name += "#my_htmx_content"
+    tournament = get_object_or_404(Tournament, id=tournament_id)
+    matches = tournament.matches.all()  # assuming a related matches field
+
+    # Add a participant check to each match
+    for match in matches:
+        match.is_participant = request.user == match.player1 or request.user == match.player2
+
+    context = {
+        'tournament': tournament,
+        'matches': matches,
+    }
+    return push_url(render(request, template_name, context),'')
+
 @login_required(login_url='/users/login/')
 def tournament_detail(request: HtmxHttpRequest, tournament_id):
     logger.debug("== tournament_detail")
@@ -181,7 +191,7 @@ def tournament_list(request: HtmxHttpRequest) -> HttpResponse:
     else:
         create_tournament_form = CreateTournamentForm()
 
-    tournaments = Tournament.objects.all()
+    tournaments = Tournament.objects.all().order_by('id').reverse()
 
     response= render(request, template_name, {
         'create_tournament_form': create_tournament_form,
@@ -190,30 +200,39 @@ def tournament_list(request: HtmxHttpRequest) -> HttpResponse:
     return push_url(response,f"/game/tournaments/")   
 
 @login_required(login_url='/users/login/')
-def play_match(request, tournament_id, match_id):
+def play_match(request: HtmxHttpRequest, tournament_id, match_id):
     logger.debug("== play_match")
-    match = get_object_or_404(TournamentMatch, id=match_id, tournament_id=tournament_id)
-    if match.status != 'pending':
+    template_name = "game/game.html"
+    if request.htmx:
+        template_name += "#my_htmx_content"
+    matche = get_object_or_404(TournamentMatch, id=match_id, tournament_id=tournament_id)
+    if matche.status != 'pending':
         return HttpResponseBadRequest("Match already in progress or completed.")
-    if request.user not in [match.player1, match.player2]:
-        return HttpResponseForbidden("You are not a participant in this match.")
+    if request.user not in [matche.player1, matche.player2]:
+        return HttpResponseForbidden("You are not a participant in this matche.")
 
-    if match.party:
-        party = match.party
+    if matche.party:
+        party = matche.party
     else:
-        # Create a new Party for the match
+        # Create a new Party for the matche
         party = Party.objects.create(
             creator=request.user,
             num_players=2,
             status='active'
         )
         # Add both players to the Party
-        party.participants.add(match.player1, match.player2)
-        # Associate the party with the match
-        match.party = party
-        match.save()
+        party.participants.add(matche.player1, matche.player2)
+        # Associate the party with the matche
+        matche.party = party
+        matche.save()
 
-    return redirect('game:game_with_match', party_id=party.id, match_id=match.id,)
+    response= render(request, template_name, {
+        'party_id': party.id,
+        'match_id': matche.id,
+    })
+    return push_url(response,'')
+    # return redirect('game:game_with_match', party_id=party.id, match_id=matche.id,)
+# path('tournaments/<int:tournament_id>/play_match/<int:match_id>/', play_match, name='play_match'),
 
 ################################################################################
 ###     GAME
