@@ -135,8 +135,8 @@ def start_tournament(request: HtmxHttpRequest, tournament_id):
     context = {
         'tournament_id': tournament.id,
     }
-    return push_url(render(request, template_name, context),'')
-    #return redirect('game:tournament_progress', tournament_id=tournament.id)
+    # return push_url(render(request, template_name, context),'')
+    return redirect('game:tournament_progress', tournament_id=tournament.id)
 
 @login_required(login_url='/users/login/')
 def tournament_progress(request: HtmxHttpRequest, tournament_id):
