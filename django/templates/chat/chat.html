@@ -50,16 +50,18 @@
                     {% endif %}
                     <img src="{{ i.profile.image.url }}" alt="User Image" class="user-image">
                     <span>{{ i.profile.user.username }}</span>
-                    <form id="create-room-form-{{ i.profile.user.id }}" hx-target="#app-root" hx-post="{% url 'chat:create_room' %}" class="user-form">
+                     <form id="create-room-form-{{ i.profile.user.id }}" 
+                        hx-post="{% url 'chat:create_room' %}" 
+                        hx-target="#app-root" 
+                        hx-include="this"
+                        class="user-form">
                         {% csrf_token %}
-                        <input type="hidden" name="name" value="">
-                        <input type="hidden" name="slug" value="">
-                        <input type="hidden" name="user2_id" value="{{ i.profile.user.id }}">
-                        <button type="button" onclick="generateRoom('{{ i.profile.user.id }}')">
+                        <button  type="submit" >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chat-fill" viewBox="0 0 16 16">
                                 <path d="M8 15c4.418 0 8-3.134 8-7s-3.582-7-8-7-8 3.134-8 7c0 1.76.743 3.37 1.97 4.6-.097 1.016-.417 2.13-.771 2.966-.079.186.074.394.273.362 2.256-.37 3.597-.938 4.18-1.234A9 9 0 0 0 8 15"/>
                             </svg>
                         </button>
+                        <input type="hidden" name="user2_id" value="{{ i.profile.user.id }}">
                     </form>
                 </div>
             {% endif %}
@@ -68,20 +70,5 @@
         <p>You have no friends yet.</p>
     {% endif %}
 
-{% endblock %}
-{% block script_body %}
-    <script>
-        document.title = 'Chat';
-        function generateRoom(userId) {
-            var formId = "create-room-form-" + userId;
-            var name = "Room " + Math.floor(Math.random() * 1000);
-            var slug = name.toLowerCase().replace(/\s+/g, '-');
-
-            document.getElementById(formId).querySelector("input[name='name']").value = name;
-            document.getElementById(formId).querySelector("input[name='slug']").value = slug;
-
-            document.getElementById(formId).submit();
-        }
-    </script>
 {% endblock %}
 {% endpartialdef %}

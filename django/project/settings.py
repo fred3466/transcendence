@@ -208,6 +208,11 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+        'room': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
         'admin': {
             'handlers': ['console'],
             'level': 'DEBUG',

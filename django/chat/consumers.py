@@ -3,9 +3,13 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from .models import Room,Message,User
 
+import logging
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger("room")
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        logger.debug("== connect")
         self.room_name = self.scope['url_route']['kwargs']['room_slug']
         self.roomGroupName = 'chat_%s' % self.room_name
         
@@ -16,12 +20,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
         
     async def disconnect(self, close_code):
+        logger.debug("== disconnect")
         await self.channel_layer.group_discard(
             self.roomGroupName,
             self.channel_name
         )
         
     async def receive(self, text_data):
+        logger.debug("== receive")
         text_data_json = json.loads(text_data)
         message_type = text_data_json.get("type", "chat_message")
         
@@ -46,6 +52,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             pass
 
     async def game_invite(self, event):
+        logger.debug("== game_invite")
         sender = event['sender']
         recipient = event['recipient']
         party_id = event['party_id']
@@ -59,6 +66,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     async def sendMessage(self, event):
+        logger.debug("== sendMessage")
         message = event["message"]
         username = event["username"]
         await self.send(text_data=json.dumps({
@@ -69,6 +77,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     
     @sync_to_async
     def save_message(self, message, username, room_name):
+        logger.debug("== save_message username="+username+" room_name="+room_name+" message="+message)
         print(username,room_name,"----------------------")
         user=User.objects.get(username=username)
         room=Room.objects.get(name=room_name)
