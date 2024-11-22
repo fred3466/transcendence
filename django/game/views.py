@@ -117,7 +117,9 @@ def join_tournament(request: HtmxHttpRequest, tournament_id):
         return HttpResponseForbidden("Cannot join a tournament that is not active.")
     tournament.players.add(request.user)
     # return redirect('game:tournament_detail', tournament_id=tournament.id)
-    return push_url(redirect('game:tournament_progress', tournament_id=tournament.id),'')
+    # return push_url(redirect('game:tournament_progress', tournament_id=tournament.id),'')
+    # return push_url(render('game:tournament_progress', {'tournament_id':tournament.id}),'')
+    return tournament_progress(request,tournament.id)
 
 @require_POST
 @login_required(login_url='/users/login/')

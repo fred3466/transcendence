@@ -8,8 +8,10 @@ from channels.db import database_sync_to_async
 from .models import Party, LeaderboardEntry, Tournament, TournamentMatch
 from django.db.models import Max
 import logging
+import logging
+# logger = logging.getLogger(__name__)
+logger = logging.getLogger("game")
 
-logger = logging.getLogger(__name__)
 User = get_user_model()
 
 class PongConsumer(AsyncWebsocketConsumer):
@@ -22,6 +24,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_username(self, user_id):
+        logger.debug("== get_username")
         try:
             user = User.objects.get(id=user_id)
             return user.username
@@ -29,6 +32,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             return 'Unknown User'
 
     async def connect(self):
+        logger.debug("== connect")
         self.party_id = self.scope['url_route']['kwargs']['party_id']
         self.match_id = self.scope['url_route']['kwargs'].get('match_id', None)
         self.room_group_name = f'pong_{self.party_id}'
@@ -139,10 +143,12 @@ class PongConsumer(AsyncWebsocketConsumer):
                 asyncio.create_task(self.start_game_loop_with_delay(countdown_duration=3))
 
     async def start_game_loop_with_delay(self, countdown_duration):
+        logger.debug("== start_game_loop_with_delay")
         await asyncio.sleep(countdown_duration + 0.5)  # Wait for countdown + 'GO!' display time
         self.game_loop_task = asyncio.create_task(self.game_loop())
 
     async def disconnect(self, close_code):
+        logger.debug("== disconnect")
         await self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
@@ -163,6 +169,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         await self.update_party_on_disconnect(self.party_id)
 
     async def receive(self, text_data):
+        logger.debug("== receive")
         data = json.loads(text_data)
         action = data.get('action')
 
@@ -176,6 +183,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 paddle['x'] = data['paddleX']
 
     async def start_game(self, event):
+        logger.debug("== start_game")
         await self.send(text_data=json.dumps({
             'action': 'start_game',
             'player_ids': event['player_ids'],
@@ -184,6 +192,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         }))
 
     def increase_ball_speed(self, speed_x, speed_y, max_speed, speed_increment):
+        logger.debug("== increase_ball_speed")
         # Increase speed while keeping the direction
         new_speed_x = speed_x * speed_increment
         new_speed_y = speed_y * speed_increment
@@ -197,6 +206,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         return new_speed_x, new_speed_y
 
     async def game_loop(self):
+        logger.debug("== game_loop")
         game_state = PongConsumer.game_states[self.room_group_name]
         ball = game_state['ball']
         paddle_positions = game_state['paddle_positions']
@@ -254,12 +264,12 @@ class PongConsumer(AsyncWebsocketConsumer):
             # Check for game over condition
             if num_players == 2:
                 for player_id, score in scores.items():
-                    if score >= 5:
+                    if score >= 3:
                         await self.end_game(winner=player_id)
                         return
             else:
                 for player_id, score in scores.items():
-                    if score <= -5:
+                    if score <= -3:
                         await self.end_game(loser=player_id)
                         return
 
@@ -350,6 +360,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         }))
 
     async def end_game(self, loser=None, winner=None):
+        logger.debug("== end_game")
         game_state = PongConsumer.game_states[self.room_group_name]
         num_players = game_state['num_players']
         if winner is not None:
@@ -404,6 +415,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
 
     async def game_over(self, event):
+        logger.debug("== game_over")
         winners = event['winners']
         losers = event['losers']
         scores = event['scores']
@@ -418,6 +430,7 @@ class PongConsumer(AsyncWebsocketConsumer):
         }))
 
     async def create_leaderboard_entry(self, players, scores):
+        logger.debug("== create_leaderboard_entry")
         # Extract player IDs
         player1_id = players[0]
         player2_id = players[1]
@@ -447,6 +460,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def get_party_num_players(self, party_id):
+        logger.debug("== get_party_num_players")
         try:
             party = Party.objects.get(id=party_id)
             return party.num_players
@@ -455,6 +469,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def update_party_on_connect(self, party_id):
+        logger.debug("== update_party_on_connect")
         try:
             party = Party.objects.get(id=party_id)
             party.nbPlayer += 1
@@ -466,6 +481,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def update_party_on_disconnect(self, party_id):
+        logger.debug("== update_party_on_disconnect")
         try:
             party = Party.objects.get(id=party_id)
             if party.status != 'completed':
@@ -478,6 +494,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def set_party_completed(self, party_id):
+        logger.debug("== set_party_completed")
         try:
             party = Party.objects.get(id=party_id)
             party.status = 'completed'
@@ -486,6 +503,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             pass
 
     async def update_user_profiles(self, winners, losers):
+        logger.debug("== update_user_profiles")
         for user_id in winners:
             try:
                 user = await database_sync_to_async(User.objects.get)(id=user_id)
@@ -504,6 +522,7 @@ class PongConsumer(AsyncWebsocketConsumer):
                 pass
 
     async def update_tournament_match(self, match_id, winner, scores):
+        logger.debug("== update_tournament_match")
         try:
             logger.debug(f"Updating tournament match {match_id} with winner {winner}")
             match = await database_sync_to_async(TournamentMatch.objects.get)(id=match_id)
@@ -523,6 +542,7 @@ class PongConsumer(AsyncWebsocketConsumer):
             logger.error(f"Error updating tournament match: {e}")
 
     async def progress_tournament(self, tournament):
+        logger.debug("== progress_tournament")
         logger.debug(f"Progressing tournament {tournament.id}")
         
         # Get the current round number
@@ -607,6 +627,7 @@ class PongConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def associate_party_with_match(self, party_id, match_id):
+        logger.debug("== associate_party_with_match")
         try:
             match = TournamentMatch.objects.get(id=match_id)
             party = Party.objects.get(id=party_id)
