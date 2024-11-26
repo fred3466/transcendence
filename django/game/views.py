@@ -306,7 +306,7 @@ def lobby(request: HtmxHttpRequest) -> HttpResponse:
             template_name = "game/game.html"
             if request.htmx:
                 template_name += "#my_htmx_content"
-                response= render(request, template_name, {
+            response= render(request, template_name, {
                 'party_id': None,
                 'match_id': None,
                 'tournament_id': None,
@@ -314,7 +314,7 @@ def lobby(request: HtmxHttpRequest) -> HttpResponse:
                 'num_players': 0,
                 'show_alerts': False,
             })
-            return push_url(response,f"/game/lobby/")   
+            return push_url(response,'')    
         
         # If the form is valid, save the party
         if form.is_valid():
