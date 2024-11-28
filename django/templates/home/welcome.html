@@ -1,13 +1,65 @@
 {% extends 'home.html' %}
 {% load partials %}
+{% load static %}
 
 {% partialdef my_htmx_content inline %}
-{% load static %}
+
+{% block head %}
+    {{ block.super }}
+    <!-- Vous pouvez garder l'inclusion de animate.css ou la supprimer selon votre besoin -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"> -->
+{% endblock %}
 
 {% block body %}
 <script>document.title = 'Home'</script>
 
-	<h1>Home page</h1>
+
+    <!-- Mode d'emploi pour le jeu Pong -->
+    <section class="container mt-5">
+        <h2 class="text-center mb-4" style="white-space: nowrap;">Mode d'emploi Pong</h2>
+        <div class="card" style="animation-duration: 1.5s; animation-delay: 0.5s;">
+            <div class="card-body">
+                <h4>Introduction</h4>
+                <p>Pong est l'un des premiers jeux vidéo d'arcade créés et simule un jeu de ping-pong. L'objectif est de marquer des points en faisant passer la balle derrière la raquette de votre adversaire.</p>
+                
+                <h4>Comment jouer :</h4>
+                <ul>
+                    <li>Chaque joueur contrôle une raquette qui se déplace verticalement de haut en bas.</li>
+                    <li>Utilisez les touches <strong>W</strong> et <strong>S</strong> pour déplacer la raquette du joueur 1 (à gauche).</li>
+                    <li>Utilisez les flèches <strong>haut</strong> et <strong>bas</strong> pour déplacer la raquette du joueur 2 (à droite).</li>
+                </ul>
+                
+                <h4>Règles du jeu :</h4>
+                <ol>
+                    <li>Le jeu commence avec le service automatique de la balle.</li>
+                    <li>La balle rebondit sur les murs supérieurs et inférieurs.</li>
+                    <li>Un point est marqué lorsqu'un joueur ne parvient pas à renvoyer la balle et que celle-ci passe derrière sa raquette.</li>
+                    <li>Le jeu continue jusqu'à ce qu'un joueur atteigne le score limite ou que le match soit terminé.</li>
+                </ol>
+
+                <h4>Conseils :</h4>
+                <p>Essayez de prévoir la trajectoire de la balle et positionnez votre raquette à l'avance pour avoir de meilleures chances de renvoyer la balle efficacement.</p>
+                
+                <!-- Exemple d'insertion d'image dans le texte -->
+                <div style="display: flex; justify-content: center; align-items: center; height: 60vh;">
+                    <div class="tenor-gif-embed" data-postid="11296580" data-share-method="host" data-aspect-ratio="1.33333" data-width="70%">
+                      <a href="https://tenor.com/view/rage-quit-quit-quit-game-pong-gif-11296580">Rage Quit Quit GIF</a>from 
+                      <a href="https://tenor.com/search/rage+quit-gifs">Rage Quit GIFs</a>
+                    </div>
+                    <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
+                  </div>
+                <p>Comme vous pouvez le voir, le jeu est simple mais très addictif.</p>
+            </div>
+        </div>
+    </section>
 {% endblock %}
 
 {% endpartialdef %}
+Réduire
+
+
+
+
+
+
+

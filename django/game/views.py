@@ -274,7 +274,7 @@ def game(request: HtmxHttpRequest, party_id, match_id=None) -> HttpResponse:
         'num_players': party.num_players,
         'show_alerts': False,
     })
-    return push_url(response,f"/game/game/")  
+    return push_url(response,f"")  
 
 @login_required(login_url='/users/login/')
 def lobby(request: HtmxHttpRequest) -> HttpResponse:

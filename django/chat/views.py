@@ -110,18 +110,21 @@ def create_room(request: HtmxHttpRequest):
         # Ensure consistent order of usernames for room slug
         user1_id = user1.id
         room_slug = '_'.join(sorted([user1.username, user2.username]))
+        logger.debug("== create_room room_slug="+room_slug)
         template_name = "chat/room.html"
         if request.htmx:
             template_name += "#my_htmx_content"
 
-        room=Room.objects.get(slug=room_slug)
-        if not room:
+        # room=Room.objects.get(slug=room_slug)
+        existing_room = Room.objects.filter(slug=room_slug).exists()
+        if not existing_room:
+            logger.debug("== create_room CREATING room_slug="+str(room_slug))
             room = Room.objects.create(slug=room_slug, user1=user1, user2=user2)
             room.name='Room '+ str(room.id)
             room.save()
-            # return redirect('chat:room', slug=room_slug)
-            # Room already exists, redirect to the existing room
-        logger.debug("== create_room room_slug="+str(room_slug))
+        else:
+            logger.debug("== create_room RETRIEVING room_slug="+str(room_slug))
+            room=Room.objects.get(slug=room_slug)
         
         messages=Message.objects.filter(room=Room.objects.get(slug=room_slug))
         profile = get_object_or_404(Profile, user=user2)

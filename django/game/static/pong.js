@@ -1,6 +1,17 @@
 // static/pong.js
+//window.console.warn("pong.js")
+/*
+$('.nav_links li').on('click', function(){
+    alert("Ele clicked");
+    $('.nav_links li').off('click');
+    if(socket !== null){
+        socket.close();
+    }
+});
+*/
 
-const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+//const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+ protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
 let socketUrl = protocol + '://' + window.location.host + '/ws/pong/' + party_id + '/';
 console.log(`WebSocket URL: ${socketUrl}`);
 
@@ -8,7 +19,13 @@ if (match_id) {
     socketUrl += `${match_id}/`;
 }
 console.log(`WebSocket URL: ${socketUrl}`);
+
 const socket = new WebSocket(socketUrl);
+/*window.onbeforeunload = function() {
+    window.alert("unload");
+    websocket.onclose = function () {}; // disable onclose handler first
+    websocket.close();
+};*/
 
 let userId = null;
 let playerIds = [];  // To hold player IDs
@@ -240,18 +257,22 @@ socket.onmessage = function(event) {
 };
 
 function updateScoreBoard() {
-    const player1Id = playerIds[0];
-    const player2Id = playerIds[1];
-    document.getElementById('leftScore').textContent = `${playerUsernames[player1Id]}: ${scores[player1Id]}`;
-    document.getElementById('rightScore').textContent = `${playerUsernames[player2Id]}: ${scores[player2Id]}`;
-
-    if (playerIds.length === 3) {
-        const player3Id = playerIds[2];
-        document.getElementById('topScore').textContent = `${playerUsernames[player3Id]}: ${scores[player3Id]}`;
-        document.getElementById('topScore').style.display = 'block';
-    } else {
-        document.getElementById('topScore').style.display = 'none';
-    }
+    try {
+        const player1Id = playerIds[0];
+        const player2Id = playerIds[1];
+        document.getElementById('leftScore').textContent = `${playerUsernames[player1Id]}: ${scores[player1Id]}`;
+        document.getElementById('rightScore').textContent = `${playerUsernames[player2Id]}: ${scores[player2Id]}`;
+    
+        if (playerIds.length === 3) {
+            const player3Id = playerIds[2];
+            document.getElementById('topScore').textContent = `${playerUsernames[player3Id]}: ${scores[player3Id]}`;
+            document.getElementById('topScore').style.display = 'block';
+        } else {
+            document.getElementById('topScore').style.display = 'none';
+        }
+    } catch (e) {
+      socket.close();
+    }   
 }
 
 

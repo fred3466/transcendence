@@ -1,38 +1,52 @@
 /* GLOBAL SETTINGS */
 
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'); /* Import de la police Press Start 2P */
+
 * {
     padding: 0;
+    margin: 0;
+    box-sizing: border-box;
 }
 
 :root {
-    --main-bg-color: #0A1A2A; /* Body background color from styles.css */
-    --secondary-bg-color: rgba(10, 26, 42, 0.9); /* Header background color */
-    --bg-layer1: #0A1A2A; /* Using body background color */
-    --bg-layer2: #0A1A2A; /* Using body background color */
-    --text-color: #F1F1F1; /* Text color from styles.css */
-    --accent: #00ADEF; /* Accent color from styles.css */
-    --accent-hover: #007EA7; /* Hover accent color from styles.css */
-    --alert: #ED4245; /* Retained original alert color */
+    --main-bg-color: #1A1A1D; /* Noir profond */
+    --secondary-bg-color: #2D2D34; /* Fond gris foncé */
+    --bg-layer1: #1A1A1D; /* Couche de fond principale */
+    --bg-layer2: #2D2D34; /* Couche de fond secondaire */
+    --text-color: #39FF14; /* Vert néon */
+    --accent: #FF00FF; /* Magenta néon */
+    --accent-hover: #00FFFF; /* Cyan néon */
+    --alert: #FF4500; /* Rouge vif */
 }
 
 body {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Press Start 2P', cursive; /* Police rétro pixel art */
     line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
+    -webkit-font-smoothing: none; /* Style pixelisé */
     min-height: 100vh;
     background-color: var(--main-bg-color);
     color: var(--text-color);
     display: flex;
     flex-direction: column;
+    /* align-items: center; */
 }
 
-/* BUILT-IN TAGS */
 
-li, a, button {
-    font-family: 'Roboto', sans-serif;
-    font-weight: 500;
-    font-size: 16px;
-    text-decoration: none;
+/* TITRES ET TEXTES */
+
+h1, h3, h4, h5, h6 {
+    color: var(--accent);
+    text-shadow: 2px 2px 0 #000000;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+h1:hover, h3:hover, h4:hover, h5:hover, h6:hover {
+    color: var(--accent-hover); /* Cyan néon */
+    text-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent); /* Ombre lumineuse */
+}
+
+p, li, a, button {
+    font-family: 'Press Start 2P', cursive;
     color: var(--text-color);
 }
 
@@ -113,6 +127,7 @@ p {
     margin-bottom: 0;
 }
 
+
 /* CONTAINERS & LAYOUT TAGS */
 
 main {
@@ -129,10 +144,12 @@ main {
     justify-content: center;
 }
 
+
 /* NAVIGATION BAR */
 
 header {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     padding: 20px 40px;
@@ -151,36 +168,36 @@ header {
 }
 
 .logo {
-    cursor: pointer;
-    font-family: 'Roboto', sans-serif;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--text-color);
-    margin-right: 12px;
-}
-
-.logo:hover {
-    color: var(--accent);
+    font-size: 1.2rem; /* Taille de police plus grande */
+    color: var(--text-color); /* Applique la couleur de texte (vert néon) */
+    text-decoration: none; /* Supprime la décoration par défaut (souligné) */
+    font-family: 'Press Start 2P', cursive; /* Police rétro pixel art */
+    /* transition: color 0.3s ease; Transition pour un effet de survol */
+    animation: blink 2.5s infinite; /* Clignote */
+	margin-bottom: 15px;
 }
 
 .nav_links {
     list-style: none;
     display: flex;
     margin-bottom: 0;
+    flex-wrap: wrap;
+    padding: 0;
 }
 
 .nav_links li {
-    list-style: none;
-    margin: 0 15px;
+    margin: 0px 15px 10px 20px;
 }
 
 .nav_links li a {
     color: var(--text-color);
-    transition: color 0.3s ease;
+    transition: color 0.3s ease, text-shadow 0.3s ease; /* Transition pour couleur et ombre */
+    white-space: nowrap;
 }
 
 .nav_links li a:hover {
-    color: var(--accent);
+    color: var(--accent-hover); /* Cyan néon lors du survol */
+    text-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent); /* Ombre lumineuse */
 }
 
 .user_pic {
@@ -254,6 +271,7 @@ header {
     font-weight: 600;
 }
 
+
 /* ALERTS */
 
 .sidebar {
@@ -272,8 +290,8 @@ header {
     margin-right: 10px;
 }
 
-/* LOGIN PAGE */
 
+/* LOGIN PAGE */
 
 .login_box {
     margin: auto;
@@ -311,6 +329,17 @@ header {
     border-right: 1px solid var(--accent);
 }
 
+.login_img {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login_img img {
+    max-width: 100%; /* S'assure que l'image ne dépasse pas le conteneur */
+    height: auto;
+}
+
 .form {
     width: 100%;  /* Updated to full width */
     margin: 0 auto;
@@ -331,6 +360,11 @@ header {
     margin-right: 12px;
 }
 
+.cta-space {
+    margin-right: 50px;
+}
+
+
 /* REGISTRATION */
 
 .signin_box {
@@ -347,12 +381,15 @@ header {
     flex-direction: column;
 }
 
+
 /* PROFILE */
 
-.profile_container {
-    width: 456px;
-    margin: auto;
-    text-align: center;
+#profile-container {
+    width: 456px;             /* Largeur fixe, ajuster selon vos besoins */
+    text-align: left;       /* Centre le texte */
+    padding: 20px;            /* Ajoute de l'espace autour du contenu */
+    border-radius: 10px;      /* Bords arrondis */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre légère pour un effet de profondeur */
 }
 
 .profile_container div:last-child {
@@ -418,6 +455,7 @@ header {
     margin-left: 10px;
 }
 
+
 /* User Cards and Status Indicators */
 
 .request_card {
@@ -469,67 +507,58 @@ header {
     background-color: tomato;
 }
 
+
 /* LEADERBOARD */
 
 .table {
-    margin: 40px 0;
+    margin: 40px auto; /* Centrer */
     background-color: var(--bg-layer1);
     border-radius: 20px;
-    border: 1px solid var(--accent);
     box-shadow: 0 0.4rem 0.8rem var(--secondary-bg-color);
     overflow: hidden;
+    width: 80%; /* Réduire la largeur globale de la table */
+    max-width: 600px; /* Limiter la largeur maximum */
 }
 
 table {
-    width: 100%;
+    width: 100%; /* S'assurer que l'intérieur occupe toute la largeur disponible */
 }
 
 .table_header {
     text-align: center;
-    background-color: var(--accent);
+    background-color: #00ff00;
+    width: 100%; /* Réduit la largeur totale à 80% de l'écran */
+    max-width: 800px; /* Fixe une largeur maximale pour limiter l'expansion */
+    margin: 0 auto; /* Centre l'élément horizontalement */
+    padding: 10px 0; /* Ajuste l'espace vertical */
+    border-radius: 10px; /* Garde des coins arrondis */
+}
+
+@keyframes clignoter {
+    0%, 100% {
+        opacity: 1; /* Texte visible */
+    }
+    50% {
+        opacity: 0; /* Texte invisible */
+    }
 }
 
 .table_header h1 {
-    font-size: 32px;
+    font-size: 50px;
     padding: 8px 0;
+    margin: 0;
+    color: #ff00ff; /* Couleur du texte */
+    animation: clignoter 1s infinite; /* Appliquer l'animation */
 }
 
-/* .table_body {
-    width: 100%;
-    margin: 0.8rem auto;
-    border: 1px solid var(--accent);
-    border-radius: 0 0 10px 10px;
-    overflow: auto;
-} */
-
-td {
-    display: flex;
-    color: white;
-    align-items: center;
-}
-
-td img {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    margin-right: 10px;
-}
-
-table, th, td {
-    padding: 1rem;
+/* Ajuster les cellules */
+td, th {
+    text-align: center;
+    font-size: 16px; /* Réduire un peu la taille du texte */
 }
 
 tr {
-    display: flex;
     justify-content: space-between;
-}
-
-thead th {
-    position: sticky;
-}
-
-tbody tr {
-    cursor: pointer;
 }
 
 tbody tr:nth-child(even) {
@@ -540,6 +569,140 @@ tbody tr:nth-child(odd) {
     background-color: var(--bg-layer2);
 }
 
-tbody tr:hover {
-    background-color: var(--accent);
+/* Animation de clignotement et de changement de couleur */
+@keyframes blink {
+    0% { opacity: 1; color: #ff0000; }
+    50% { opacity: 0; color: #00ff00; }
+    100% { opacity: 1; color: #0000ff; }
+}
+
+/* Application de l'animation à l'élément */
+/* .blink-text {
+    font-size: 50px;
+    font-weight: bold;
+    animation: blink 1.5s infinite;
+} */
+
+/* Animation de l'image "Pong" */
+.pong-img {
+    display: block;
+    margin: 30px auto;
+    width: 250px;
+    animation: bounce 2s infinite ease-in-out;
+}
+
+@keyframes bounce {
+    0% {
+        transform: translateY(0);
+    }
+    10% {
+        transform: translateY(-100px); /* Rebond vers le haut */
+    }
+    20% {
+        transform: translateY(20px); /* Rebond vers le bas */
+    }
+    30% {
+        transform: translateY(-80px); /* Rebond moyen vers le haut */
+    }
+    40% {
+        transform: translateY(20px); /* Rebond moyen vers le bas */
+    }
+    50% {
+        transform: translateY(-60px); /* Rebond moyen vers le haut */
+    }
+    60% {
+        transform: translateY(20px); /* Rebond moyen vers le bas */
+    }
+    70% {
+        transform: translateY(-40px); /* Rebond moyen vers le haut */
+    }
+    80% {
+        transform: translateY(20px); /* Rebond moyen vers le bas */
+    }
+    90% {
+        transform: translateY(-20px); /* Rebond moyen vers le haut */
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/* Style pour le bouton Play Now */
+.btn-play-now {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--accent); /* Couleur magenta néon */
+    color: var(--text-color); /* Texte vert néon */
+    text-decoration: none; /* Supprime le soulignement */
+    border: 2px solid var(--accent-hover); /* Bordure cyan */
+    border-radius: 10px; /* Coins arrondis */
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.2s; /* Effet sur fond et transformation */
+}
+
+.btn-play-now:hover {
+    background-color: var(--accent-hover); /* Cyan néon au survol */
+    color: var(--main-bg-color); /* Texte noir au survol */
+    transform: scale(1.1); /* Légèrement agrandi au survol */
+    box-shadow: 0 0 10px var(--accent-hover), 0 0 20px var(--accent-hover); /* Effet lumineux */
+}
+
+.btn-play-now:active {
+    background-color: var(--alert); /* Rouge vif lors du clic */
+    transform: scale(0.95); /* Légèrement réduit pour un effet de clic */
+    box-shadow: none; /* Supprime l'effet lumineux */
+}
+
+/* Style pour tournament-container*/
+.tournament-container {
+    max-width: 800px; /* Ajustez selon la largeur de votre design */
+    margin: 0 auto; /* Centre le contenu */
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+}
+
+.tournament-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.match-info {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+}
+
+.match-info strong {
+    flex: 1 0 20%; /* Largeur flexible pour le titre */
+}
+
+.match-info span {
+    flex: 1 0 25%; /* Largeur pour chaque joueur */
+    text-align: left;
+}
+
+.match-info .match-status {
+    flex: 1 0 20%; /* Largeur pour l'état */
+    text-align: right;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.match-info .btn-play-now {
+    flex: 1 0 15%; /* Largeur pour le bouton */
+    text-align: right;
+    background-color: #28a745;
+    color: white;
+    padding: 5px 10px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 0.9em;
+}
+
+.match-info .btn-play-now:hover {
+    background-color: #218838;
 }

@@ -44,7 +44,7 @@ if (num_players === "0") {
 
 {% block body %}
 <div id="waiting-room">
-    <p>Waiting for another player to join...</p>
+    <p>Waiting for another player ({{ num_players|escapejs }} max) to join ({{ party_id|escapejs }})...</p>
 </div>
 
 <div id="game-container">
