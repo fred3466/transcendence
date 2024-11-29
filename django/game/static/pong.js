@@ -10,9 +10,9 @@ $('.nav_links li').on('click', function(){
 });
 */
 
-//const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+// protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
  protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
-let socketUrl = protocol + '://' + window.location.host + '/ws/pong/' + party_id + '/';
+ socketUrl = protocol + '://' + window.location.host + '/ws/pong/' + party_id + '/';
 console.log(`WebSocket URL: ${socketUrl}`);
 
 if (match_id) {
@@ -20,51 +20,51 @@ if (match_id) {
 }
 console.log(`WebSocket URL: ${socketUrl}`);
 
-const socket = new WebSocket(socketUrl);
+ socket = new WebSocket(socketUrl);
 /*window.onbeforeunload = function() {
     window.alert("unload");
     websocket.onclose = function () {}; // disable onclose handler first
     websocket.close();
 };*/
 
-let userId = null;
-let playerIds = [];  // To hold player IDs
-let isPlayerOne = false;
-let isPlayerTwo = false;
-let isPlayerThree = false;
+ userId = null;
+ playerIds = [];  // To hold player IDs
+ isPlayerOne = false;
+ isPlayerTwo = false;
+ isPlayerThree = false;
 
-let playerUsernames = {};
+ playerUsernames = {};
 
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+ canvas = document.getElementById('gameCanvas');
+ ctx = canvas.getContext('2d');
 
 // Game variables
-const paddleWidth = 10;
-const paddleHeight = 100;
-const ballRadius = 10;
+ paddleWidth = 10;
+ paddleHeight = 100;
+ ballRadius = 10;
 
-let paddle1Y = (canvas.height - paddleHeight) / 2;  // Left paddle (Player 1)
-let paddle2Y = (canvas.height - paddleHeight) / 2;  // Right paddle (Player 2)
-let paddle3X = (canvas.width - paddleHeight) / 2;   // Top paddle (Player 3)
+ paddle1Y = (canvas.height - paddleHeight) / 2;  // Left paddle (Player 1)
+ paddle2Y = (canvas.height - paddleHeight) / 2;  // Right paddle (Player 2)
+ paddle3X = (canvas.width - paddleHeight) / 2;   // Top paddle (Player 3)
 
-let ballX = canvas.width / 2;
-let ballY = canvas.height / 2;
+ ballX = canvas.width / 2;
+ ballY = canvas.height / 2;
 
-let upPressed = false;
-let downPressed = false;
-let leftPressed = false;
-let rightPressed = false;
+ upPressed = false;
+ downPressed = false;
+ leftPressed = false;
+ rightPressed = false;
 
-let gameStarted = false;
+ gameStarted = false;
 
-const scoreBoard = document.createElement('div');
+ scoreBoard = document.createElement('div');
 scoreBoard.id = 'scoreBoard';
 
-const leftScoreSpan = document.createElement('span');
+ leftScoreSpan = document.createElement('span');
 leftScoreSpan.id = 'leftScore';
-const rightScoreSpan = document.createElement('span');
+ rightScoreSpan = document.createElement('span');
 rightScoreSpan.id = 'rightScore';
-const topScoreSpan = document.createElement('span');
+ topScoreSpan = document.createElement('span');
 topScoreSpan.id = 'topScore';
 
 scoreBoard.appendChild(leftScoreSpan);
@@ -82,7 +82,7 @@ scoreBoard.style.textAlign = 'center';
 scoreBoard.style.marginBottom = '10px';
 document.getElementById('game-container').insertBefore(scoreBoard, canvas);
 
-let scores = {};
+ scores = {};
 
 // Event listeners for key presses
 document.addEventListener('keydown', keyDownHandler);
@@ -129,7 +129,7 @@ socket.onopen = function() {
 };
 
 function startCountdown(duration) {
-    let countdownTime = duration;
+     countdownTime = duration;
 
     function updateCountdown() {
         // Clear the canvas
@@ -157,83 +157,28 @@ function startCountdown(duration) {
     updateCountdown();
 }
 
-socket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
+function abort(data,no_reentrant=0){
+    do_game_over(data,no_reentrant);
+}
 
-    if (data.action === 'set_user_id') {
-        userId = parseInt(data.user_id);
-        console.log(`Your user ID is: ${userId}`);
-    }
-
-    if (data.action === 'start_game') {
-        gameStarted = false;
-        document.getElementById('waiting-room').style.display = 'none';
-        document.getElementById('game-container').style.display = 'block';
-
-        playerIds = data.player_ids.map(id => parseInt(id));
-        playerUsernames = data.player_usernames;
-
-        // Determine player role
-        if (userId === playerIds[0]) {
-            isPlayerOne = true;
-        } else if (userId === playerIds[1]) {
-            isPlayerTwo = true;
-        } else if (playerIds.length === 3 && userId === playerIds[2]) {
-            isPlayerThree = true;
-        } else {
-            console.error('User ID does not match any player ID');
-        }
-
-        // Initialize scores
-        scores = {};
-        playerIds.forEach(id => {
-            scores[id] = 0;
-        });
-
-        const countdownDuration = data.countdown_duration || 3;
-        startCountdown(countdownDuration);
-    }
-
-    if (data.action === 'update_state') {
-        // Update game state based on data from server
-        ballX = data.ballX;
-        ballY = data.ballY;
+function do_game_over(data,no_reentrant=0){
+    try{
         scores = data.scores;
-    
-        const paddles = data.paddles;
-        playerIds.forEach(playerId => {
-            const paddle = paddles[playerId];
-            if (paddle.orientation === 'vertical') {
-                if (playerId === playerIds[0]) {
-                    paddle1Y = paddle.y;
-                } else if (playerId === playerIds[1]) {
-                    paddle2Y = paddle.y;
-                }
-            } else if (paddle.orientation === 'horizontal' && playerIds.length === 3) {
-                paddle3X = paddle.x;
-            }
-        });
-    
-        // Update the score display
-        updateScoreBoard();
-    }
-
-    if (data.action === 'game_over') {
-        scores = data.scores;
-        updateScoreBoard();
+        if(no_reentrant===0)
+            updateScoreBoard(data);
         gameStarted = false;
-
-        const canvas = document.getElementById('gameCanvas');
-        const gameoverMessage = document.getElementById('gameover-message');
-
+        
+         canvas = document.getElementById('gameCanvas');
+         gameoverMessage = document.getElementById('gameover-message');
+        
         // Get canvas position relative to its parent
-        const canvasRect = canvas.getBoundingClientRect();
-        const parentRect = canvas.parentElement.getBoundingClientRect();
-
+         canvasRect = canvas.getBoundingClientRect();
+         parentRect = canvas.parentElement.getBoundingClientRect();
+        
         // Calculate the position of the canvas relative to its parent
-        const topPosition = canvas.offsetTop;
-        const leftPosition = canvas.offsetLeft;
-
+         topPosition = canvas.offsetTop;
+         leftPosition = canvas.offsetLeft;
+        
         // Apply styles to position the gameover message over the canvas
         gameoverMessage.style.position = 'absolute';
         gameoverMessage.style.top = topPosition + 'px';
@@ -241,37 +186,122 @@ socket.onmessage = function(event) {
         gameoverMessage.style.width = canvas.width - 44 + 'px';
         gameoverMessage.style.height = canvas.height  - 32 + 'px';
         gameoverMessage.style.display = 'flex';
+        
+        socket.close();
+        
+        if(data.action == 'game_over')
+            msg=data.message;
+        else
+            msg="Something went wrong with other side, aborting !";
+        
+        
+        document.getElementById('gameover-text').textContent = msg + ' Redirecting...';
+    } catch (e) {
+            socket.close();
+    }   
+    
+    // Optionally redirect or reset the game
+    setTimeout(function() {
+        if (match_id) {
+            htmx.ajax('GET', '/game/tournaments/'+ tournament_id + '/progress/','#app-root')
+/*            window.location.href = '/game/tournaments/'+ tournament_id + '/progress/';*/
+            return;
+        }
+        else {
+            htmx.ajax('GET', '/game/lobby/','#app-root')
+            /*window.location.href = '/game/lobby/';*/
+        }
+    }, 3000);
+}
 
-        document.getElementById('gameover-text').textContent = data.message + ' Redirecting...';
-        // Optionally redirect or reset the game
-        setTimeout(function() {
-            if (match_id) {
-                window.location.href = '/game/tournaments/'+ tournament_id + '/progress/';
-                return;
+socket.onmessage = function(event) {
+    data = JSON.parse(event.data);
+    try{
+    
+        if (data.action === 'set_user_id') {
+            userId = parseInt(data.user_id);
+            console.log(`Your user ID is: ${userId}`);
+        }
+    
+        if (data.action === 'start_game') {
+            gameStarted = false;
+            document.getElementById('waiting-room').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+    
+            playerIds = data.player_ids.map(id => parseInt(id));
+            playerUsernames = data.player_usernames;
+    
+            // Determine player role
+            if (userId === playerIds[0]) {
+                isPlayerOne = true;
+            } else if (userId === playerIds[1]) {
+                isPlayerTwo = true;
+            } else if (playerIds.length === 3 && userId === playerIds[2]) {
+                isPlayerThree = true;
+            } else {
+                console.error('User ID does not match any player ID');
             }
-            else {
-                window.location.href = '/game/lobby/';
-            }
-        }, 3000);
-    }
+    
+            // Initialize scores
+            scores = {};
+            playerIds.forEach(id => {
+                scores[id] = 0;
+            });
+    
+             countdownDuration = data.countdown_duration || 3;
+            startCountdown(countdownDuration);
+        }
+    
+        if (data.action === 'update_state') {
+            // Update game state based on data from server
+            ballX = data.ballX;
+            ballY = data.ballY;
+            scores = data.scores;
+        
+             paddles = data.paddles;
+            playerIds.forEach(playerId => {
+                 paddle = paddles[playerId];
+                if (paddle.orientation === 'vertical') {
+                    if (playerId === playerIds[0]) {
+                        paddle1Y = paddle.y;
+                    } else if (playerId === playerIds[1]) {
+                        paddle2Y = paddle.y;
+                    }
+                } else if (paddle.orientation === 'horizontal' && playerIds.length === 3) {
+                    paddle3X = paddle.x;
+                }
+            });
+        
+            // Update the score display
+            updateScoreBoard(data);
+        }
+    
+        if (data.action === 'game_over') {
+            do_game_over(data);
+        }
+    } catch (e) {
+       abort(data);
+    }   
+
 };
 
-function updateScoreBoard() {
+function updateScoreBoard(data) {
     try {
-        const player1Id = playerIds[0];
-        const player2Id = playerIds[1];
+         player1Id = playerIds[0];
+         player2Id = playerIds[1];
         document.getElementById('leftScore').textContent = `${playerUsernames[player1Id]}: ${scores[player1Id]}`;
         document.getElementById('rightScore').textContent = `${playerUsernames[player2Id]}: ${scores[player2Id]}`;
     
         if (playerIds.length === 3) {
-            const player3Id = playerIds[2];
+             player3Id = playerIds[2];
             document.getElementById('topScore').textContent = `${playerUsernames[player3Id]}: ${scores[player3Id]}`;
             document.getElementById('topScore').style.display = 'block';
         } else {
             document.getElementById('topScore').style.display = 'none';
         }
     } catch (e) {
-      socket.close();
+        no_reentrant=1;
+        abort(data,no_reentrant);
     }   
 }
 
@@ -284,7 +314,7 @@ socket.onclose = function() {
 function sendPaddlePosition() {
     if (!gameStarted) return;
 
-    let positionData = {};
+     positionData = {};
 
     if (isPlayerOne) {
         if (typeof paddle1Y === 'number') {

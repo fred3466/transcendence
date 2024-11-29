@@ -6,41 +6,19 @@
 {% load static %}
 
 {% block styles %}
-    <link rel="stylesheet" href="{% static 'styles.css' %}">
 {% endblock %}
 
 {% block script_body %}
 <script>document.title = 'Game f'</script>
 <script>
-    const user = '{{ user.username|escapejs }}';
-    const party_id = '{{ party_id|escapejs }}';
-    const num_players = '{{ num_players|escapejs }}';
-    const match_id = "{{ match_id|default_if_none:'' }}";
-    const tournament_id = "{{ tournament_id|default_if_none:'' }}";
-</script>
-
-<script>
-if (num_players === "0") {
-	// alert("PLAYING WITH AI");
-	const script = document.createElement('script');
-	script.src = "{% static 'pongLocal.js' %}";
-	script.defer = true;
-	document.head.appendChild(script);
-} else if (num_players === "1") {
-	// alert("PLAYING WITH AI");
-	const script = document.createElement('script');
-	script.src = "{% static 'pongIA.js' %}";
-	script.defer = true;
-	document.head.appendChild(script);
-} else {
-	// alert("PLAYING WITH OTHER HUMAN");
-	const script = document.createElement('script');
-	script.src = "{% static 'pong.js' %}";
-	script.defer = true;
-	document.head.appendChild(script);
-}
+     user = '{{ user.username|escapejs }}';
+     party_id = '{{ party_id|escapejs }}';
+     num_players = '{{ num_players|escapejs }}';
+     match_id = "{{ match_id|default_if_none:'' }}";
+     tournament_id = "{{ tournament_id|default_if_none:'' }}";
 </script>
 {% endblock %}
+
 
 {% block body %}
 <div id="waiting-room">
@@ -54,5 +32,15 @@ if (num_players === "0") {
             <p id="redirect-text"></p>
         </div>
 </div>
+{% if num_players == "0" %}
+    <!-- alert("PLAYING WITH AI"); -->
+    <script src="{% static 'pongLocal.js' %}" defer="false"/>
+{% elif num_players == "1" %}
+    <!-- alert("PLAYING WITH AI"); -->
+    <script src="{% static 'pongIA.js' %}" defer="false"/>
+{% else %}
+     <!-- alert("PLAYING WITH OTHER HUMAN"); -->
+    <script src="{% static 'pong.js' %}" defer="false"/>
+{% endif %}
 {% endblock %}
 {% endpartialdef %}

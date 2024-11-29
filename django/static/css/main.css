@@ -1,6 +1,6 @@
 /* GLOBAL SETTINGS */
 
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap'); /* Import de la police Press Start 2P */
+@import url('press_start.css'); /* Import de la police Press Start 2P */
 
 * {
     padding: 0;
@@ -432,14 +432,6 @@ header {
 .header_img {
     margin-right: 20px;
     border-radius: 200px;
-}
-
-.header_info {
-    /* Additional styles if needed */
-}
-
-.header_score {
-    /* Additional styles if needed */
 }
 
 .bs_v, .bs_l {
