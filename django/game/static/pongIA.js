@@ -133,6 +133,13 @@ function updateScoreBoard() {
 
 function draw() {
     if (!gameStarted) return;
+    
+    leftScore=document.getElementById('leftScore');
+    if(!leftScore){
+        window.cancelAnimationFrame(requestID_animation);
+        requestID_animation=null;
+        return;
+    }
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
