@@ -193,9 +193,11 @@ function do_game_over(data,no_reentrant=0){
         else
             msg="Something went wrong with other side, aborting !";
         
-        
+            socket.send(JSON.stringify({
+                        'action': 'end_game'
+                    }));
         document.getElementById('gameover-text').textContent = msg + ' Redirecting...';
-        socket.close();
+        /*socket.close();*/
     } catch (e) {
             socket.close();
     }   
