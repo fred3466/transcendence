@@ -1,32 +1,32 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+ canvas = document.getElementById('gameCanvas');
+ ctx = canvas.getContext('2d');
 
 // Game variables
-const paddleWidth = 10;
-const paddleHeight = 100;
-const ballRadius = 10;
+ paddleWidth = 10;
+ paddleHeight = 100;
+ ballRadius = 10;
 
-let paddle1Y = (canvas.height - paddleHeight) / 2;
-let paddle2Y = (canvas.height - paddleHeight) / 2;
-let ballX = canvas.width / 2;
-let ballY = canvas.height / 2;
-let ballSpeedX = 5;
-let ballSpeedY = 3;
+ paddle1Y = (canvas.height - paddleHeight) / 2;
+ paddle2Y = (canvas.height - paddleHeight) / 2;
+ ballX = canvas.width / 2;
+ ballY = canvas.height / 2;
+ ballSpeedX = 5;
+ ballSpeedY = 3;
 
-let upPressed = false;
-let downPressed = false;
+ upPressed = false;
+ downPressed = false;
 
-let gameStarted = false;
+ gameStarted = false;
 
-let score1 = 0;
-let score2 = 0;
+ score1 = 0;
+ score2 = 0;
 
-const scoreBoard = document.createElement('div');
+ scoreBoard = document.createElement('div');
 scoreBoard.id = 'scoreBoard';
 
-const leftScoreSpan = document.createElement('span');
+ leftScoreSpan = document.createElement('span');
 leftScoreSpan.id = 'leftScore';
-const rightScoreSpan = document.createElement('span');
+ rightScoreSpan = document.createElement('span');
 rightScoreSpan.id = 'rightScore';
 scoreBoard.appendChild(leftScoreSpan);
 scoreBoard.appendChild(rightScoreSpan);
@@ -40,7 +40,7 @@ scoreBoard.style.marginBottom = '10px';
 document.getElementById('game-container').insertBefore(scoreBoard, canvas);
 
 // Game over message
-const gameOverMessage = document.createElement('div');
+ gameOverMessage = document.createElement('div');
 gameOverMessage.id = 'gameOverMessage';
 gameOverMessage.style.fontSize = '32px';
 gameOverMessage.style.textAlign = 'center';
@@ -81,13 +81,13 @@ function startGame() {
 }
 
 function moveAI(random = false) {
-    let tempBallX = ballX;
-    let tempBallY = ballY;
-    let tempBallSpeedY = ballSpeedY;
+     tempBallX = ballX;
+     tempBallY = ballY;
+     tempBallSpeedY = ballSpeedY;
 
     // Predict the Y position of the ball when it reaches the AI paddle
-    let maxIterations = 1000; // Set a maximum number of iterations to prevent infinite loop
-    let iterations = 0;
+     maxIterations = 1000; // Set a maximum number of iterations to prevent infinite loop
+     iterations = 0;
 
     while (tempBallX <= canvas.width - paddleWidth && iterations < maxIterations)
 	{
@@ -100,8 +100,8 @@ function moveAI(random = false) {
         iterations++;
     }
 
-    let predictedY = tempBallY;
-    let paddleCenterY = paddle2Y + paddleHeight / 2;
+     predictedY = tempBallY;
+     paddleCenterY = paddle2Y + paddleHeight / 2;
 
 	if (random === false)
 	{
@@ -190,7 +190,7 @@ function draw() {
     updateScoreBoard();
 
     // Check for game over
-    if (score1 >= 5 || score2 >= 5) {
+    if (score1 >= 3 || score2 >= 3) {
         gameOver();
         return;
     }

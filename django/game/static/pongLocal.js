@@ -1,34 +1,34 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+ canvas = document.getElementById('gameCanvas');
+ ctx = canvas.getContext('2d');
 
 // Game variables
-const paddleWidth = 10;
-const paddleHeight = 100;
-const ballRadius = 10;
+ paddleWidth = 10;
+ paddleHeight = 100;
+ ballRadius = 10;
 
-let paddle1Y = (canvas.height - paddleHeight) / 2;
-let paddle2Y = (canvas.height - paddleHeight) / 2;
-let ballX = canvas.width / 2;
-let ballY = canvas.height / 2;
-let ballSpeedX = 5;
-let ballSpeedY = 3;
+ paddle1Y = (canvas.height - paddleHeight) / 2;
+ paddle2Y = (canvas.height - paddleHeight) / 2;
+ ballX = canvas.width / 2;
+ ballY = canvas.height / 2;
+ ballSpeedX = 5;
+ ballSpeedY = 3;
 
-let upPressed = false;
-let downPressed = false;
-let wPressed = false;
-let sPressed = false;
+ upPressed = false;
+ downPressed = false;
+ wPressed = false;
+ sPressed = false;
 
-let gameStarted = false;
+ gameStarted = false;
 
-let score1 = 0;
-let score2 = 0;
+ score1 = 0;
+ score2 = 0;
 
-const scoreBoard = document.createElement('div');
+ scoreBoard = document.createElement('div');
 scoreBoard.id = 'scoreBoard';
 
-const leftScoreSpan = document.createElement('span');
+ leftScoreSpan = document.createElement('span');
 leftScoreSpan.id = 'leftScore';
-const rightScoreSpan = document.createElement('span');
+ rightScoreSpan = document.createElement('span');
 rightScoreSpan.id = 'rightScore';
 scoreBoard.appendChild(leftScoreSpan);
 scoreBoard.appendChild(rightScoreSpan);
@@ -42,7 +42,7 @@ scoreBoard.style.marginBottom = '10px';
 document.getElementById('game-container').insertBefore(scoreBoard, canvas);
 
 // Game over message
-const gameOverMessage = document.createElement('div');
+ gameOverMessage = document.createElement('div');
 gameOverMessage.id = 'gameOverMessage';
 gameOverMessage.style.fontSize = '32px';
 gameOverMessage.style.textAlign = 'center';
@@ -95,8 +95,17 @@ function updateScoreBoard() {
     document.getElementById('rightScore').textContent = `Player 2: ${score2}`;
 }
 
+var requestID_animation;
 function draw() {
     if (!gameStarted) return;
+    
+    leftScore=document.getElementById('leftScore');
+    if(!leftScore){
+        window.cancelAnimationFrame(requestID_animation);
+        requestID_animation=null;
+        return;
+    }
+        
 
     // Clear canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -162,7 +171,7 @@ function draw() {
     updateScoreBoard();
 
     // Check for game over
-    if (score1 >= 5 || score2 >= 5) {
+    if (score1 >= 3 || score2 >= 3) {
         gameOver();
         return;
     }
@@ -180,8 +189,8 @@ function draw() {
     } else if (downPressed && paddle2Y + paddleHeight < canvas.height) {
         paddle2Y += 7;
     }
-
-    requestAnimationFrame(draw);
+    
+    requestID_animation=requestAnimationFrame(draw);
 }
 
 function resetBall() {

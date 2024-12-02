@@ -255,6 +255,27 @@ def play_match(request: HtmxHttpRequest, tournament_id, match_id):
 ###     GAME
 ################################################################################
 
+# def game(request: HtmxHttpRequest, party_id, match_id=None) -> HttpResponse:
+#     logger.debug("== game")
+#     party = get_object_or_404(Party, id=party_id)
+#     tournament_id = None
+#     if match_id:
+#         match = get_object_or_404(TournamentMatch, id=match_id)
+#         tournament_id = match.tournament.id
+#
+#     template_name = "game/game.html"
+#     if request.htmx:
+#         template_name += "#my_htmx_content"
+#     return render(request, template_name, {
+#         'party_id': party_id,
+#         'match_id': match_id,
+#         'tournament_id': tournament_id,
+#         'user': request.user,
+#         'num_players': party.num_players,
+#         'show_alerts': False,
+#     })
+
+
 def game(request: HtmxHttpRequest, party_id, match_id=None) -> HttpResponse:
     logger.debug("== game")
     party = get_object_or_404(Party, id=party_id)
@@ -262,7 +283,7 @@ def game(request: HtmxHttpRequest, party_id, match_id=None) -> HttpResponse:
     if match_id:
         matche = get_object_or_404(TournamentMatch, id=match_id)
         tournament_id = matche.tournament.id
-        
+
     template_name = "game/game.html"
     if request.htmx:
         template_name += "#my_htmx_content"
@@ -276,6 +297,87 @@ def game(request: HtmxHttpRequest, party_id, match_id=None) -> HttpResponse:
     })
     return push_url(response,f"")  
 
+# @login_required(login_url='/users/login/')
+# def lobby(request: HtmxHttpRequest) -> HttpResponse:
+#     logger.debug("== lobby")
+#     if request.method == 'POST':
+#         form = CreatePartyForm(request.POST)
+#         try:
+#             # Convert num_players to an integer
+#             num_players = int(request.POST.get('num_players', 0))  # Default to 0 if not provided
+#         except ValueError:
+#             num_players = 0  # Handle invalid input
+#
+#         # Check if num_players is 1, otherwise proceed with form validation
+#         if num_players == 1:
+#             template_name = "game/game.html"
+#             if request.htmx:
+#                 template_name += "#my_htmx_content"
+#             return render(request, template_name, {
+#                 'party_id': None,
+#                 'match_id': None,
+#                 'tournament_id': None,
+#                 'user': request.user,
+#                 'num_players': 1,
+#                 'show_alerts': False,
+#             })
+#         # Vérifier si num_players est 0 (jeu local)
+#         elif num_players == 0:
+#             template_name = "game/game.html"
+#             if request.htmx:
+#                 template_name += "#my_htmx_content"
+#                 return render(request, template_name, {
+#                 'party_id': None,
+#                 'match_id': None,
+#                 'tournament_id': None,
+#                 'user': request.user,
+#                 'num_players': 0,
+#                 'show_alerts': False,
+#             })
+#
+#         # If the form is valid, save the party
+#         if form.is_valid():
+#             party = form.save(commit=False)
+#             party.creator = request.user
+#             party.save()
+# #################### copié depuis game:game, à revoir  
+#             tournament_id = None
+#             #if match_id:
+#              #   match = get_object_or_404(TournamentMatch, id=match_id)
+#             #    tournament_id = match.tournament.id
+#             template_name = "game/game.html"
+#             if request.htmx:
+#                 template_name += "#my_htmx_content"
+#             return render(request, template_name, {
+#                 'show_alerts' : False,
+#                 'party_id': party.id,
+#                 #'match_id': match_id,
+#                 #'tournament_id': tournament_id,
+#                 'user': request.user,
+#                 'num_players': party.num_players,
+#                 'show_alerts': False,
+#             })
+#             #return redirect('game:game', party_id=party.id)  # Redirect to the game
+#             ##return HttpResponseClientRedirect('game/game.html', party_id=party.id)  # Redirect to the game
+#             ##return render(request,'game/game.html', {'party_id' : party.id})  # Redirect to the game
+# ########################################            
+#     else:
+#         form = CreatePartyForm()
+#
+#     # Handle GET request
+#     template_name = "game/lobby.html"
+#     if request.htmx:
+#         template_name += "#my_htmx_content"
+#
+#     parties = Party.objects.exclude(status='completed').order_by('id').reverse()
+#     return render(request, template_name, {
+#         'show_alerts': False,
+#         'form': form,
+#         'parties': parties,
+#         'num_players': None  # Default to None for GET request
+#     })
+
+
 @login_required(login_url='/users/login/')
 def lobby(request: HtmxHttpRequest) -> HttpResponse:
     logger.debug("== lobby")
@@ -286,7 +388,8 @@ def lobby(request: HtmxHttpRequest) -> HttpResponse:
             num_players = int(request.POST.get('num_players', 0))  # Default to 0 if not provided
         except ValueError:
             num_players = 0  # Handle invalid input
-        
+
+        logger.debug("== lobby num_players="+str(num_players))
         # Check if num_players is 1, otherwise proceed with form validation
         if num_players == 1:
             template_name = "game/game.html"
@@ -315,7 +418,7 @@ def lobby(request: HtmxHttpRequest) -> HttpResponse:
                 'show_alerts': False,
             })
             return push_url(response,f"/game/lobby/")   
-        
+
         # If the form is valid, save the party
         if form.is_valid():
             party = form.save(commit=False)

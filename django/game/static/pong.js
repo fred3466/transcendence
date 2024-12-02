@@ -187,7 +187,6 @@ function do_game_over(data,no_reentrant=0){
         gameoverMessage.style.height = canvas.height  - 32 + 'px';
         gameoverMessage.style.display = 'flex';
         
-        socket.close();
         
         if(data.action == 'game_over')
             msg=data.message;
@@ -196,6 +195,7 @@ function do_game_over(data,no_reentrant=0){
         
         
         document.getElementById('gameover-text').textContent = msg + ' Redirecting...';
+        socket.close();
     } catch (e) {
             socket.close();
     }   

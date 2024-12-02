@@ -21,9 +21,12 @@
 
 
 {% block body %}
-<div id="waiting-room">
-    <p>Waiting for another player ({{ num_players|escapejs }} max) to join ({{ party_id|escapejs }})...</p>
-</div>
+	<div id="waiting-room">
+	    <p>Waiting for another player ({{ num_players|escapejs }} max) to join ({{ party_id|escapejs }})...</p>
+	</div>
+<script>
+/* alert("num_players="+num_players); */
+</script>
 
 <div id="game-container">
         <canvas id="gameCanvas" width="800" height="600"></canvas>
@@ -32,15 +35,16 @@
             <p id="redirect-text"></p>
         </div>
 </div>
-{% if num_players == "0" %}
-    <!-- alert("PLAYING WITH AI"); -->
+{% if num_players == 0 %}
+    <!-- alert("PLAYING Local"); -->
     <script src="{% static 'pongLocal.js' %}" defer="false"/>
-{% elif num_players == "1" %}
+{% elif num_players == 1 %}
     <!-- alert("PLAYING WITH AI"); -->
     <script src="{% static 'pongIA.js' %}" defer="false"/>
-{% else %}
-     <!-- alert("PLAYING WITH OTHER HUMAN"); -->
+{% elif num_players == 2 %}
+    <!-- alert("PLAYING WITH AI"); -->
     <script src="{% static 'pong.js' %}" defer="false"/>
+{% else %}
 {% endif %}
 {% endblock %}
 {% endpartialdef %}
