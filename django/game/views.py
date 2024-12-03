@@ -215,79 +215,86 @@ def tournament_list(request: HtmxHttpRequest) -> HttpResponse:
     })
     return push_url(response,'')   
 
-@login_required(login_url='/users/login/')
-def play_match(request: HtmxHttpRequest, tournament_id, match_id):
-    logger.debug("== play_match tournament_id="+str(tournament_id)+" match_id="+str(match_id))
-    template_name = "game/game.html"
-    if request.htmx:
-        template_name += "#my_htmx_content"
-    matche = get_object_or_404(TournamentMatch, id=match_id, tournament_id=tournament_id)
-    if matche.status != 'pending':
-        return HttpResponseBadRequest("Match already in progress or completed.")
-    if request.user not in [matche.player1, matche.player2]:
-        return HttpResponseForbidden("You are not a participant in this matche.")
+# @login_required(login_url='/users/login/')
+# def play_match(request: HtmxHttpRequest, tournament_id, match_id):
+#     logger.debug("== play_match")
+#     template_name = "game/game.html"
+#     if request.htmx:
+#         template_name += "#my_htmx_content"
+#     matche = get_object_or_404(TournamentMatch, id=match_id, tournament_id=tournament_id)
+#     if matche.status != 'pending':
+#         return HttpResponseBadRequest("Match already in progress or completed.")
+#     if request.user not in [matche.player1, matche.player2]:
+#         return HttpResponseForbidden("You are not a participant in this match.")
+#
+#     if matche.party:
+#         party = matche.party
+#     else:
+#         # Create a new Party for the matche
+#         party = Party.objects.create(
+#             creator=request.user,
+#             num_players=2,
+#             status='active'
+#         )
+#         # Add both players to the Party
+#         party.participants.add(matche.player1, matche.player2)
+#         # Associate the party with the matche
+#         matche.party = party
+#         matche.save()
+#
+#     logger.debug("== play_match party_id="+str(party.id)+" match_id="+str(match_id))
+#     response= render(request, template_name, {
+#         'party_id': party.id,
+#         'match_id': matche.id,
+#         # 'tournament_id': matche.tournament.id,
+#     })
+#     return push_url(response,'')
+#     # return redirect('game:game_with_match', party_id=party.id, match_id=matche.id,)
+# # path('tournaments/<int:tournament_id>/play_match/<int:match_id>/', play_match, name='play_match'),
 
-    if matche.party:
-        party = matche.party
+@login_required(login_url='/users/login/')
+def play_match(request, tournament_id, match_id):
+    logger.debug("== play_match")
+    match = get_object_or_404(TournamentMatch, id=match_id, tournament_id=tournament_id)
+    if match.status != 'pending':
+        return HttpResponseBadRequest("Match already in progress or completed.")
+    if request.user not in [match.player1, match.player2]:
+        return HttpResponseForbidden("You are not a participant in this match.")
+
+    if match.party:
+        party = match.party
     else:
-        # Create a new Party for the matche
+        # Create a new Party for the match
         party = Party.objects.create(
             creator=request.user,
             num_players=2,
             status='active'
         )
         # Add both players to the Party
-        party.participants.add(matche.player1, matche.player2)
-        # Associate the party with the matche
-        matche.party = party
-        matche.save()
+        party.participants.add(match.player1, match.player2)
+        # Associate the party with the match
+        match.party = party
+        match.save()
 
-    response= render(request, template_name, {
-        'party_id': party.id,
-        'match_id': matche.id,
-        'tournament_id': matche.tournament.id,
-    })
-    return push_url(response,'')
-    # return redirect('game:game_with_match', party_id=party.id, match_id=matche.id,)
-# path('tournaments/<int:tournament_id>/play_match/<int:match_id>/', play_match, name='play_match'),
+    return redirect('game:game_with_match', party_id=party.id, match_id=match.id,)
+
 
 ################################################################################
 ###     GAME
 ################################################################################
-
-# def game(request: HtmxHttpRequest, party_id, match_id=None) -> HttpResponse:
-#     logger.debug("== game")
-#     party = get_object_or_404(Party, id=party_id)
-#     tournament_id = None
-#     if match_id:
-#         match = get_object_or_404(TournamentMatch, id=match_id)
-#         tournament_id = match.tournament.id
-#
-#     template_name = "game/game.html"
-#     if request.htmx:
-#         template_name += "#my_htmx_content"
-#     return render(request, template_name, {
-#         'party_id': party_id,
-#         'match_id': match_id,
-#         'tournament_id': tournament_id,
-#         'user': request.user,
-#         'num_players': party.num_players,
-#         'show_alerts': False,
-#     })
-
 
 def game(request: HtmxHttpRequest, party_id, match_id=None) -> HttpResponse:
     logger.debug("== game")
     party = get_object_or_404(Party, id=party_id)
     tournament_id = None
     if match_id:
-        matche = get_object_or_404(TournamentMatch, id=match_id)
-        tournament_id = matche.tournament.id
+        match = get_object_or_404(TournamentMatch, id=match_id)
+        tournament_id = match.tournament.id
 
     template_name = "game/game.html"
     if request.htmx:
         template_name += "#my_htmx_content"
-    response= render(request, template_name, {
+    return render(request, template_name, {
         'party_id': party_id,
         'match_id': match_id,
         'tournament_id': tournament_id,
@@ -295,7 +302,28 @@ def game(request: HtmxHttpRequest, party_id, match_id=None) -> HttpResponse:
         'num_players': party.num_players,
         'show_alerts': False,
     })
-    return push_url(response,f"")  
+
+
+# def game(request: HtmxHttpRequest, party_id, match_id=None) -> HttpResponse:
+#     logger.debug("== game")
+#     party = get_object_or_404(Party, id=party_id)
+#     tournament_id = None
+#     if match_id:
+#         matche = get_object_or_404(TournamentMatch, id=match_id)
+#         tournament_id = matche.tournament.id
+#
+#     template_name = "game/game.html"
+#     if request.htmx:
+#         template_name += "#my_htmx_content"
+#     response= render(request, template_name, {
+#         'party_id': party_id,
+#         'match_id': match_id,
+#         'tournament_id': tournament_id,
+#         'user': request.user,
+#         'num_players': party.num_players,
+#         'show_alerts': False,
+#     })
+#     return push_url(response,f"")  
 
 # @login_required(login_url='/users/login/')
 # def lobby(request: HtmxHttpRequest) -> HttpResponse:
